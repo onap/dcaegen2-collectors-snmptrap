@@ -1,0 +1,24 @@
+protocol:
+    transport: udp
+    interface: localhost
+    port: 6163
+    dns_cache_ttl_seconds: 60
+
+files:
+    runtime_base_dir: /opt/app/dcae_snmptrapd
+    log_dir: /opt/app/dcae_snmptrapd/logs
+    data_dir: /opt/app/dcae_snmptrapd/data
+    pid_dir: /var/tmp
+    dcae_snmptrapd_diag: /opt/app/dcae_snmptrapd/logs/dcae_snmptrapd.log
+    raw_traps_log: /opt/app/dcae_snmptrapd/logs/trapd.log
+    published_traps_dir: /opt/app/dcae_snmptrapd/logs
+    trap_stats_log: /opt/app/dcae_snmptrapd/logs/dcae_snmptrapd_stats.csv
+    perm_status_file: /opt/app/dcae_snmptrapd/logs/dcae_snmptrapd.permStatus.log
+
+ueb:
+    dmaap_conf: /etc/dcae/dmaap.conf
+    http_timeout: 5
+    primary_publisher: true
+    peer_publisher: null
+    max_traps_between_publish: 50
+    max_milliseconds_between_publish: 3500
