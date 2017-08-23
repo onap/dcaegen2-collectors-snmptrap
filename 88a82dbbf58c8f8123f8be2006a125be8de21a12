@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a437d4f_70fe7c6d",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2017-08-23T18:13:32Z",
+      "side": 1,
+      "message": "This file should be updated for SNMP",
+      "range": {
+        "startLine": 6,
+        "startChar": 0,
+        "endLine": 111,
+        "endChar": 3
+      },
+      "revId": "88a82dbbf58c8f8123f8be2006a125be8de21a12",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
