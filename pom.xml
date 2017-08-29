@@ -1,21 +1,35 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!--
+================================================================================
+Copyright (c) 2017 AT&T Intellectual Property. All rights reserved.
+================================================================================
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+============LICENSE_END=========================================================
+
+ECOMP is a trademark and service mark of AT&T Intellectual Property.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0   http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.onap.oparent</groupId>
     <artifactId>oparent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <!-- parent>
-           <groupId>org.onap.dcae.platform</groupId>
-    <artifactId>plugins</artifactId>
-    <version>1.0.0</version>
-  </parent -->
 
   <!--- CHANGE THE FOLLOWING 3 OBJECTS for your own repo -->
   <groupId>org.onap.dcaegen2.collectors</groupId>
   <artifactId>snmptrap</artifactId>
-  <name>dcae_snmptrap</name>
+  <name>snmptrap</name>
   
   <version>1.0.0-SNAPSHOT</version>
   <url>http://maven.apache.org</url>
@@ -23,7 +37,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.sources>.</sonar.sources>
     <!-- customize the SONARQUBE URL -->
-    <sonar.host.url>http://localhost:9000</sonar.host.url>
+    <!-- sonar.host.url>http://localhost:9000</sonar.host.url -->
     <!-- below are language dependent -->
     <!-- for Python -->
     <sonar.language>py</sonar.language>
@@ -31,7 +45,7 @@
     <sonar.inclusions>**/*.py</sonar.inclusions>
     <!-- for JavaScaript -->
     <!--
-             <sonar.language>js</sonar.language>
+    <sonar.language>js</sonar.language>
     <sonar.pluginName>JS</sonar.pluginName>
     <sonar.inclusions>**/*.js</sonar.inclusions>
     -->
@@ -41,37 +55,30 @@
     <finalName>${project.artifactId}-${project.version}</finalName>
     <pluginManagement>
       <plugins>
+        <!-- the following plugins are invoked from oparent, we do not need them -->
+
+
         <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-          <version>2.7.1</version>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.7</version>
+          <configuration>
+            <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+          </configuration>
         </plugin>
-      </plugins>
-    </pluginManagement>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <!-- This version supports the "deployAtEnd" parameter -->
+          <version>2.8</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
 
-    <plugins>
-      <!-- plugin>
-                   <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4.1</version>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly/dep.xml</descriptor>
-          </descriptors>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin -->
-
-      <!-- first disable the default Java plugins at various stages -->
+        <!-- first disable the default Java plugins at various stages -->
       <!-- maven-resources-plugin is called during "*resource" phases by default behavior.  it prepares the resources
-                  dir.  we do not need it -->
+       dir.  we do not need it -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -105,7 +112,7 @@
       </plugin>
 
       <!-- maven-install-plugin is called during "install" phase by default behavior.  it tries to copy stuff under 
-                  target dir to ~/.m2.  we do not need it -->
+       target dir to ~/.m2.  we do not need it -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
@@ -116,7 +123,7 @@
       </plugin>
 
       <!-- maven-surefire-plugin is called during "test" phase by default behavior.  it triggers junit test.
-                  we do not need it -->
+       we do not need it -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -125,6 +132,30 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
+
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <!-- plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <descriptors>
+            <descriptor>assembly/dep.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin -->
 
 
       <!-- now we configure custom action (calling a script) at various lifecycle phases -->
