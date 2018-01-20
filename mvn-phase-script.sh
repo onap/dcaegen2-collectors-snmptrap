@@ -56,10 +56,10 @@ if [ -z "$WORKSPACE" ]; then
     WORKSPACE=$(pwd)
 fi
 
-if [ -z "$SETTINGS_FILE" ]; then
-    echo "SETTINGS_FILE environment variable not set.  Cannot proceed"
-    exit
-fi
+#if [ -z "$SETTINGS_FILE" ]; then
+#    echo "SETTINGS_FILE environment variable not set.  Cannot proceed"
+#    exit
+#fi
    
 
 
@@ -116,31 +116,9 @@ deploy)
   # copy the ones suitable for your repo, and remove the "if false" statement
 
   # build docker image from Docker file (under root of repo) and push to registry
-  if  false ; then
     build_and_push_docker
-  fi
 
   # upload all yaml file under the root of repo
-  if  false ; then
-    upload_files_of_extension yaml
-  fi
-
-  if  false ; then
-    case $MVN_PROJECT_MODULEID in
-    bootstrap)
-      # build docker image from Docker file (under module dir) and push to registry
-      build_and_push_docker
-      ;;
-    scripts)
-      # upload all sh file under the root of module 
-      upload_files_of_extension sh
-      ;;
-    *)
-      echo "====> unknown mvn project module"
-      ;;
-    esac
-  fi
-
   ;;
 *)
   echo "==> unprocessed phase"
