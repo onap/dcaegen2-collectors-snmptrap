@@ -16,5 +16,7 @@ mvn clean install
 
 ### to be completed
 
-The application is bundled into a docker image installed by the DCAE Controller. Following is the process to creating the image
+The application is bundled into a docker image installed by the DCAE Controller. Following is the process to creating the image:
+
+<FIXME: add detailed instructions >
 

@@ -1,0 +1,34 @@
+snmptrap: '2.0'
+info:
+    version: 2.1
+    title: ONAP SNMP Trap Receiver
+
+protocol:
+    transport: udp
+    ipv4_interface: 0.0.0.0
+    ipv4_port: 6164
+    ipv6_interface: ::1
+    ipv6_port: 6164
+    dns_cache_ttl_seconds: 60
+
+files:
+    runtime_base_dir: /opt/app/snmptrap
+    log_dir: /opt/app/snmptrap/logs
+    data_dir: /opt/app/snmptrap/data
+    pid_dir: /var/tmp
+    snmptrapd_diag: /opt/app/snmptrap/logs/dcae_snmptrap.log
+    trap_conf: /opt/app/snmptrap/etc/trap.conf
+    raw_traps_log: /opt/app/snmptrap/logs/trapd.log
+    published_traps_dir: /opt/app/snmptrap/logs
+    trap_stats_log: /opt/app/snmptrap/logs/trapd_stats.csv
+    perm_status_file: /opt/app/snmptrap/logs/trapd.perm_status.log
+
+dmaap:
+    dmaap_conf: /etc/dcae/dmaap.conf
+    http_timeout: 5
+    http_retries: 3 
+    http_secs_between_retries: .75
+    primary_publisher: true
+    peer_publisher: null
+    max_traps_between_publish: 50
+    max_milliseconds_between_publish: 3500
