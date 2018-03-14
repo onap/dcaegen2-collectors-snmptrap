@@ -1,0 +1,167 @@
+{
+    "self": {
+        "name": "snmptrap_output",
+        "version": "1.0.0",
+        "description": "The output format for snmptrap, which is a SNMP trap that is loaded into a JSON structure"
+    },
+    "dataformatversion": "1.0.0",
+    "jsonschema": {
+      "anyOf": [{
+        "name": "SNMP Alert v1_0",
+        "version": "1.0.0",
+        "additionalProperties": false,
+        "properties": {
+          "cambria.partition": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "agent address": {
+            "type": "string"
+          },
+          "agent name": {
+            "type": "string"
+          },
+          "time received": {
+            "type": "string"
+          },
+          "epoch_serno": {
+            "type": "string"
+          },
+          "protocol version": {
+            "type": "string",
+            "enum": [ "v1", "v2c", "unsupported(v2u)" ]
+          },
+          "community len": {
+            "type": "string"
+          },
+          "community": {
+            "type": "string"
+          },
+          "trap category": {
+            "type": "string"
+          },
+          "sysUptime": {
+            "type": "string"
+          },
+          "notify OID len": {
+            "type": "string"
+          },
+          "notify OID": {
+            "type": "string"
+          },
+          "varbinds": {
+            "type": "array",
+            "items": { 
+              "$ref": "#varbind"
+            }
+          }
+        },
+        "required": ["cambria.partition", "uuid", "agent address", "agent name", "time received", "epoch_serno", "protocol version", "community len", "community", "trap category", "notify OID len", "notify OID", "varbinds"]
+      },
+      {"name": "SNMP Alert v3",
+        "version": "1.0.0",
+        "additionalProperties": false,
+        "properties": {
+          "cambria.partition": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "agent address": {
+            "type": "string"
+          },
+          "agent name": {
+            "type": "string"
+          },
+          "time received": {
+            "type": "string"
+          },
+          "epoch_serno": {
+            "type": "string"
+          },
+          "protocol version": {
+            "type": "string",
+            "enum": [ "v3" ]
+          },
+          "community len": {
+            "type": "string"
+          },
+          "community": {
+            "type": "string"
+          },
+          "trap category": {
+            "type": "string"
+          },
+          "sysUptime": {
+            "type": "string"
+          },
+          "notify OID len": {
+            "type": "string"
+          },
+          "notify OID": {
+            "type": "string"
+          },
+          "msg id": {
+            "type": "string"
+          },
+          "security level": {
+            "type": "string",
+            "enum": [ "noAuthNoPriv", "authNoPriv", "authPriv" ]
+          },
+          "context name": {
+            "type": "string"
+          },
+          "security name": {
+            "type": "string"
+          },
+          "security engine": {
+            "type": "string"
+          },
+          "varbinds": {
+            "type": "array",
+            "items": { 
+              "$ref": "#varbind" 
+            }
+          }
+        },
+        "required": ["cambria.partition", "uuid", "agent address", "agent name", "time received", "epoch_serno", "protocol version", "community len", "community", "trap category", "notify OID len", "notify OID", "msg id", "security level", "context name", "security name", "security engine", "varbinds"]
+      }
+      ],
+      "definitions" : {
+        "varbind" : {
+          "id" : "#varbind",
+          "additionalProperties": false,
+          "properties" : {
+            "varbind_oid": {
+              "type": "string"
+            },
+            "varbind_type": {
+              "type": "string",
+              "enum": [ "boolean",
+                        "integer",
+                        "bit",
+                        "octet",
+                        "null",
+                        "oid",
+                        "ipaddress",
+                        "counter",
+                        "unsigned",
+                        "timeticks",
+                        "opaque",
+                        "unused1",
+                        "counter64",
+                        "unused2"
+              ]
+            },
+            "varbind_value": {
+              "type": "string"
+            }
+          },
+          "required": ["varbind_oid", "varbind_type", "varbind_value"]
+        }
+      }
+    }
+}

@@ -57,7 +57,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 setup(
     name = "onap_dcae_cbs_docker_client",
     description = "snmp trap receiver for a DCAE docker image",
-    version = "1.0",
+    version = "1.2",
     packages=find_packages(),
     author = "Dave L",
     author_email = "dl3158@att.com",

@@ -3,7 +3,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.dcae
 # ================================================================================
-# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 
 
 # get to where we are supposed to be for startup
-cd /opt/app/snmptrap/src
+cd /opt/app/snmptrap/bin
 
 # include path to 3.6+ version of python that has required dependencies included
 export PATH=/opt/app/python-3.6.1/bin:$PATH
@@ -35,13 +35,18 @@ export PYTHONPATH=./mod:./:$PYTHONPATH
 export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-bundle.crt
 
 # PYTHONUNBUFFERED:
-#    set PYTHONUNBUFFERED to True to avoid output buffering; comment out for 
-#    better performance!
-# export PYTHONUNBUFFERED='True'
+#    set PYTHONUNBUFFERED to a non-empty string to avoid output buffering; 
+#    comment out for runtime environments/better performance!
+export PYTHONUNBUFFERED="True"
 
-# less verbose at startup?  Use this:
-# python dcae_snmptrapd.py -c ../etc/trapd.yaml
+# set location of config broker server overrride IF NEEDED
+#
+export CBS_SIM_JSON=../etc/snmptrapd.json
+
 # want tracing?  Use this:
 # python -m trace --trackcalls dcae_snmptrapd.py -c ../etc/trapd.yaml
+# want verbose logging?  Use this:
+# python snmptrapd.py -v
 # standard startup?  Use this:
-python dcae_snmptrapd.py -v -c ../etc/trapd.yaml
+# python snmptrapd.py
+python snmptrapd.py

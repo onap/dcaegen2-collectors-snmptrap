@@ -1,7 +1,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.dcae
 # ================================================================================
-# Copyright (c) 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,43 +19,44 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 """
-trapd_perm_status maintains a 'permanent' status file
-important messages for audit/diagnostics/etc
+trapd_http_session establishes an http session for future use in publishing
+messages to the dmaap cluster.
 """
 
 __docformat__ = 'restructuredtext'
 
 import logging
 import os
+import requests
 import string
 import time
 import traceback
+from trapd_logging import *
 
 prog_name = os.path.basename(__file__)
 
 
 # # # # # # # # # # # # #
-# fx: log_to_perm_status
+# fx: init_session_obj
 # # # # # # # # # # # # #
-def log_to_perm_status(_loc_perm_file, _loc_perm_msg, _dcae_logger):
+def init_session_obj():
     """
-    Log select errors too permanent logfile
-    access.
+    Initializes and returns a http request session object for later use
     :Parameters:
-      log message, logger
+      dcae logger for diagnostics
     :Exceptions:
-      file open
-        this function will catch exception of unable to
-        open the log file
+      session object creation
+        this function will throw an exception if unable to create
+        a new session object
     :Keywords:
-      permstatus
+      http request session
+    :Variables:
+      none
     """
-
-    perm_fmt_date = time.strftime("%a %b %d %H:%M:%S %Z %Y")
 
     try:
-        f = open(_loc_perm_file, 'a')
-        f.write("%s %s\n" % (perm_fmt_date, _loc_perm_msg))
-        f.close()
-    except IOError:
-        _dcae_logger.exception("File I/O Exception on %s" % perm_status_fd)
+        s = requests.Session()
+    except Exception as e:
+        print("Failed to create new requests session: %s" % str(e))
+
+    return s
