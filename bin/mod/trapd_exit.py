@@ -1,7 +1,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.dcae
 # ================================================================================
-# Copyright (c) 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,43 +19,45 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 """
-trapd_perm_status maintains a 'permanent' status file
-important messages for audit/diagnostics/etc
+trapc_exit_snmptrapd is responsible for removing any existing runtime PID
+file, and exiting with the provided (param 1) exit code
 """
 
 __docformat__ = 'restructuredtext'
 
-import logging
+import sys
 import os
 import string
-import time
-import traceback
+from trapd_runtime_pid import save_pid, rm_pid
 
 prog_name = os.path.basename(__file__)
 
 
 # # # # # # # # # # # # #
-# fx: log_to_perm_status
+# fx: cleanup_and_exit
+#      - remove pid file
+#      - exit with supplied return code
 # # # # # # # # # # # # #
-def log_to_perm_status(_loc_perm_file, _loc_perm_msg, _dcae_logger):
+def cleanup_and_exit(_loc_exit_code, _pid_file_name):
     """
-    Log select errors too permanent logfile
-    access.
+    Remove existing PID file, and exit with provided exit code
     :Parameters:
-      log message, logger
+      _loc_exit_code
+        value to return to calling shell upon exit
+      _pid_file_name
+        name of file that contains current process ID (for
+        removal)
     :Exceptions:
-      file open
-        this function will catch exception of unable to
-        open the log file
+      none
     :Keywords:
-      permstatus
+      runtime PID exit
+    :Variables:
+      _num_params
+        number of parameters passed to module
     """
 
-    perm_fmt_date = time.strftime("%a %b %d %H:%M:%S %Z %Y")
+    _num_params = len(locals())
 
-    try:
-        f = open(_loc_perm_file, 'a')
-        f.write("%s %s\n" % (perm_fmt_date, _loc_perm_msg))
-        f.close()
-    except IOError:
-        _dcae_logger.exception("File I/O Exception on %s" % perm_status_fd)
+    if _num_params == 2:
+        rc = rm_pid(_pid_file_name)
+    sys.exit(_loc_exit_code)

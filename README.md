@@ -1,8 +1,6 @@
 DCAE SNMPTrapReceiver
 ======================================
 
-FIXME: placeholder for dcae_snmptrap application
-
 This is the repository for SNMP Trap Receiver for Open DCAE. 
 
 ### Build Instructions
