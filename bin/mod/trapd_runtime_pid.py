@@ -1,7 +1,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.dcae
 # ================================================================================
-# Copyright (c) 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ def save_pid(_pid_file_name):
     #     print("Error saving PID file %s :" % _pid_file_name)
     #     return False
     else:
-        print("Runtime PID file:    %s" % _pid_file_name)
+        # print("Runtime PID file:    %s" % _pid_file_name)
         return True
 
 
@@ -85,7 +85,10 @@ def rm_pid(_pid_file_name):
     try:
         if os.path.isfile(_pid_file_name):
             os.remove(_pid_file_name)
-        return True
+            return True
+        else:
+            return False
+
     except IOError:
         print("Error removing Runtime PID file:    %s" % _pid_file_name)
         return False

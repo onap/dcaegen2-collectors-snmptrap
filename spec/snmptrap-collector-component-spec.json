@@ -1,0 +1,251 @@
+{
+        "self": {
+        	"version": "1.3.0",
+		"name": "snmptrap-collector",
+                "description": "Collector for receiving SNMP traps and publishing to DMAAP/MR",
+                "component_type": "docker"
+        },
+        "streams": {
+                "subscribes": [
+
+                ],
+                "publishes": [
+                        {
+                                "format": "snmptrap_output",
+                                "version": "1.3.0",
+                                "type": "message router",
+                                "config_key": "snmp_trap"
+                        }
+                ]
+        },
+        "services": {
+                "calls": [],
+                "provides": [],
+        },
+        "parameters": [
+                    {
+                        "name": "snmptrap.version",
+                        "value":"1.3.0",
+                        "description": "version number"
+                    },
+                    {
+                        "name": "snmptrap.title",
+                        "value":"ONAP SNMP Trap Receiver",
+                        "description": "title for logging"
+                    },
+                    {
+                        "name": "protocols.transport",
+                        "value":"udp",
+                        "description": "protocol used to transport trap (udp|tcp)"
+                    },
+                    {
+                        "name": "protocols.ipv4_interface",
+                        "value":"0.0.0.0",
+                        "description": "ipv4 address trap receiver should listen to (0.0.0.0 -> all)"
+                    },
+                    {
+                        "name": "protocols.ipv4_port",
+                        "value":162,
+                        "description": "port trap receiver should bind to for ipv4 traps"
+                    },
+                    {
+                        "name": "protocols.ipv6_interface",
+                        "value":"::1",
+                        "description": "ipv6 address trap receiver should listen to (::1 -> all)"
+                    },
+                    {
+                        "name": "protocols.ipv6_port",
+                        "value":162,
+                        "description": "port trap receiver should bind to for ipv6 traps"
+                    },
+                    {
+                        "name": "cache.dns_cache_ttl_seconds",
+                        "value":60,
+                        "description": "number of seconds snmptrapd will cache dns entry before re-loading it"
+                    },
+                    {
+                        "name": "publisher.http_timeout_milliseconds",
+                        "value":1500,
+                        "description":"milliseconds snmptrapd will wait for MR to respond to publish attempt",
+                    },
+                    {
+                        "name":"publisher.http_retries",
+                        "value":3,
+                        "description":"number of times snmptrapd will re-attempt MR publish before moving on",
+                    },
+                    {
+                        "name": "publisher.http_milliseconds_between_retries",
+                        "value":750,
+                        "description":"milliseconds snmptrapd will wait between MR publish re-attempts",
+                    },
+                    {
+                        "name": "publisher.http_primary_publisher",
+                        "value":"true",
+                        "description": "future use (resiliency)"
+                    },
+                    {
+                        "name": "publisher.http_peer_publisher",
+                        "value":"unavailable",
+                        "description": "future use (resiliency)"
+                    },
+                    {
+                        "name": "publisher.max_traps_between_publishes",
+                        "value":10,
+                        "description": "max number of traps snmptrapd will queue before publishing"
+                    },
+                    {
+                        "name": "publisher.max_milliseconds_between_publishes",
+                        "value":1000,
+                        "description": "max number of milliseconds snmptrapd will accumulate traps before publishing"
+                    },
+                    {
+                        "name": "files.runtime_base_dir",
+                        "value":"/opt/app/snmptrap",
+                        "description": "base dir of snmptrapd install"
+                    },
+                    {
+                        "name": "files.log_dir",
+                        "value":"logs",
+                        "description": "location from runtime_base_dir for logs"
+                    },
+                    {
+                        "name": "files.data_dir",
+                        "value":"data",
+                        "description": "location from runtime_base_dir for data"
+                    },
+                    {
+                        "name": "files.pid_dir",
+                        "value":"tmp",
+                        "description": "location from runtime_base_dir for pid_dir"
+                    },
+                    {
+                        "name": "files.arriving_traps_log",
+                        "value":"snmptrapd_arriving_traps.log",
+                        "description": "log of all arriving traps (published or not)"
+                    },
+                    {
+                        "name": "files.snmptrapd_diag",
+                        "value":"snmptrapd_prog_diag.log",
+                        "description": "future use"
+                    },
+                    {
+                        "name": "files.traps_stats_log",
+                        "value":"snmptrapd_stats.csv",
+                        "description": "future use"
+                    },
+                    {
+                        "name": "files.perm_status_file",
+                        "value":"snmptrapd_status.log",
+                        "description": "future use"
+                    },
+                    {
+                        "name": "files.eelf_base_dir",
+                        "value":"/opt/app/snmptrap/logs",
+                        "description": "directory that all EELF format logs will be written to"
+                    },
+                    {
+                        "name": "files.eelf_error",
+                        "value":"error.log",
+                        "description": "EELF error log"
+                    },
+                    {
+                        "name": "files.eelf_debug",
+                        "value":"debug.log",
+                        "description": "EELF debug log"
+                    },
+                    {
+                        "name": "files.eelf_audit",
+                        "value":"audit.log",
+                        "description": "EELF audit log"
+                    },
+                    {
+                        "name": "files.eelf_metrics",
+                        "value":"metrics.log",
+                        "description": "EELF metrics log"
+                    },
+                    {
+                        "name": "files.roll_frequency",
+                        "value":"hour",
+                        "description": "how often snmptrapd will roll logs to <logfilename>.timestamp, and start a new one"
+                    },
+                    {
+                        "name": "files.minimum_severity_to_log",
+                        "value":2,
+                        "description": "minimium severity to log in above EELF log files: SEV_DETAILED=1, SEV_INFO=2, SEV_WARN=3, SEV_CRIT=4, SEV_FATAL=5"
+
+                    },
+                    {
+                        "name": "trap_def.1.trap_oid",
+                        "value":".1.3.6.1.4.1.74.2.46.12.1.1",
+                        "description": "oid 1 of interest"
+                    },
+                    {
+                        "name": "trap_def.1.trap_category",
+                        "value":"DCAE-SNMP-TRAPS",
+                        "description": "topic to publish oid 1 to (future use)"
+                    },
+                    {
+                        "name": "trap_def.2.trap_oid",
+                        "value":"*",
+                        "description": "oid 1 of interest"
+                    },
+                    {
+                        "name": "trap_def.2.trap_category",
+                        "value":"DCAE-SNMP-TRAPS",
+                        "description": "topic to publish oid 1 to (future use)"
+                    },
+                    {
+                        "name": "stormwatch.1.stormwatch_oid",
+                        "value":".1.3.6.1.4.1.74.2.46.12.1.1",
+                        "description": "stormWatch candidate oid 1"
+                    },
+                    {
+                        "name": "stormwatch.1.low_water_rearm_per_minute",
+                        "value":"5",
+                        "description": "stormWatch candidate oid 1 low-water rearm value (future use)"
+                    },
+                    {
+                        "name": "stormwatch.1.high_water_arm_per_minute",
+                        "value":"100",
+                        "description": "stormWatch candidate oid 1 high-water storm activation value (future use)"
+                    },
+                    {
+                        "name": "stormwatch.2.stormwatch_oid",
+                        "value":".1.3.6.1.4.1.74.2.46.12.1.2",
+                        "description": "stormWatch candidate oid 2"
+                    },
+                    {
+                        "name": "stormwatch.2.low_water_rearm_per_minute",
+                        "value":"2",
+                        "description": "stormWatch candidate oid 2 low-water rearm value (future use)"
+                    },
+                    {
+                        "name": "stormwatch.2.high_water_arm_per_minute",
+                        "value":"200",
+                        "description": "stormWatch candidate oid 2 high-water storm activation value (future use)"
+                    },
+                    {
+                        "name": "stormwatch.3.stormwatch_oid",
+                        "value":".1.3.6.1.4.1.74.2.46.12.1.2",
+                        "description": "stormWatch candidate oid 3"
+                    },
+                    {
+                        "name": "stormwatch.3.low_water_rearm_per_minute",
+                        "value":"2",
+                        "description": "stormWatch candidate oid 3 low-water rearm value (future use)"
+                    },
+                    {
+                        "name": "stormwatch.3.high_water_arm_per_minute",
+                        "value":"200",
+                        "description": "stormWatch candidate oid 3 high-water storm activation value (future use)"
+                    }
+        ],
+        "auxilary": {
+        },
+        "artifacts": [
+                {
+                        "type": "docker image",
+                        "uri": "dockercentral.it.att.com:5100/com.att.dcae.controller/dcae-controller-snmptrap-collector:18.x.x"
+                }
+        ]
+}
