@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_8fbc6a07",
+        "filename": "setup.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2018-03-18T12:46:53Z",
+      "side": 1,
+      "message": "2017-2018",
+      "range": {
+        "startLine": 3,
+        "startChar": 16,
+        "endLine": 3,
+        "endChar": 21
+      },
+      "revId": "abb283c5a3b72eb2d91e6adb4eda68184f040f35",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_efc16e80",
+        "filename": "spec/snmptrap-collector-component-spec.json",
+        "patchSetId": 3
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2018-03-18T12:46:53Z",
+      "side": 1,
+      "message": "Should be replaced by onap nexus path\n\nnexus.onap.org:10001/snapshots/onap/org.onap.dcaegen2.collectors.snmptrap:\u003cversion\u003e",
+      "range": {
+        "startLine": 248,
+        "startChar": 32,
+        "endLine": 248,
+        "endChar": 128
+      },
+      "revId": "abb283c5a3b72eb2d91e6adb4eda68184f040f35",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2fcc36ba",
+        "filename": "tests/setup.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2018-03-18T12:46:53Z",
+      "side": 1,
+      "message": "should be 2018",
+      "range": {
+        "startLine": 3,
+        "startChar": 15,
+        "endLine": 3,
+        "endChar": 21
+      },
+      "revId": "abb283c5a3b72eb2d91e6adb4eda68184f040f35",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_cfc6f299",
+        "filename": "version.properties",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2018-03-18T12:46:53Z",
+      "side": 1,
+      "message": "should be 3 to match your pom.xml version",
+      "range": {
+        "startLine": 2,
+        "startChar": 6,
+        "endLine": 2,
+        "endChar": 7
+      },
+      "revId": "abb283c5a3b72eb2d91e6adb4eda68184f040f35",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
