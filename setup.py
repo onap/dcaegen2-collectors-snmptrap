@@ -1,6 +1,6 @@
 # org.onap.dcae
 # ================================================================================
-# Copyright (c) 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,10 +23,7 @@ import asyncio
 import collections
 import datetime
 import errno
-from pysnmp.carrier.asyncio.dgram import udp, udp6
-from pysnmp.entity import engine, config
-from pysnmp.entity.rfc3413 import ntfrcv
-from pysnmp.proto.api import v2c
+import inspect
 import json
 import logging
 import logging.handlers
@@ -40,24 +37,32 @@ import string
 import sys
 import time
 import traceback
-from trapd_dmaap_config import read_dmaap_config
-from trapd_exit import cleanup_and_exit
-from trapd_http_session import init_session_obj
-from trapd_perm_status import log_to_perm_status
-from trapd_runtime_pid import save_pid, rm_pid
-from trapd_trap_config import read_trap_config
-from trapd_yaml_config import read_yaml_config
+import trapd_settings
+import trapd_settings as tds
 import unicodedata
 import uuid as uuid_mod
-import yaml
+from collections import Counter
+from onap_dcae_cbs_docker_client.client import get_config
+from pysnmp.carrier.asyncio.dgram import udp, udp6
+# from pysnmp.carrier.asyncore.dgram import udp
+from pysnmp.entity import engine, config
+from pysnmp.entity.rfc3413 import ntfrcv
+from pysnmp.proto.api import v2c
+from trapd_exit import cleanup_and_exit
+from trapd_file_utils import roll_all_logs, open_eelf_logs, roll_file, open_file, close_file
+from trapd_get_cbs_config import get_cbs_config
+from trapd_http_session import init_session_obj
+from trapd_logging import ecomp_logger, stdout_logger
+from trapd_logging import stdout_logger
+from trapd_runtime_pid import save_pid, rm_pid
 
 install_reqs = parse_requirements("requirements.txt", session=PipSession())
 reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
-    name = "onap_dcae_cbs_docker_client",
-    description = "snmp trap receiver for a DCAE docker image",
-    version = "1.0",
+    name = "dcaegen2-collectors-snmptrap",
+    description = "snmp trap receiver for ONAP docker image",
+    version = "1.3.0",
     packages=find_packages(),
     author = "Dave L",
     author_email = "dl3158@att.com",
