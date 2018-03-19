@@ -12,14 +12,18 @@ WORKDIR ${APPDIR}
 EXPOSE 162
 
 # Copy the current directory contents into the container at ${APPDIR}
-COPY ./src/ ./bin/
+COPY ./bin/ ./bin/
 COPY ./etc/ ./etc/
 
-RUN mkdir -p ${APPDIR}/logs \
+RUN mkdir -p ${APPDIR}/data \
+ && mkdir -p ${APPDIR}/logs \
+ && mkdir -p ${APPDIR}/tmp \
  && chown -R ${APPUSER}:${APPUSER} ${APPDIR} \
+ && chmod a+w ${APPDIR}/data \
  && chmod a+w ${APPDIR}/logs \
+ && chmod a+w ${APPDIR}/tmp \
  && chmod 500 ${APPDIR}/etc \
- && chmod 500 ${APPDIR}/bin/dcae_snmptrapd.sh 
+ && chmod 500 ${APPDIR}/bin/snmptrapd.sh 
  
 
 USER ${APPUSER}
@@ -27,4 +31,4 @@ USER ${APPUSER}
 VOLUME ${APPDIR}/logs
 
 # Run run_policy.sh when the container launches
-CMD ["./bin/dcae_snmptrapd.sh"]
+CMD ["./bin/snmptrapd.sh start"]
