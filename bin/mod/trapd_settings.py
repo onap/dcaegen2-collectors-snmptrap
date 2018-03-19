@@ -23,6 +23,7 @@
 
 __docformat__ = 'restructuredtext'
 
+
 def init():
 
     # <CONSUL config cache>
@@ -36,7 +37,8 @@ def init():
     #     dns_cache_ip_to_name
     #        key [ip address] -> fqdn
     #     dns_cache_ip_expires
-    #        key [ip address] -> epoch time this entry expires and must be reloaded
+    #        key [ip address] -> epoch time this entry expires and must
+    #        be reloaded
     global dns_cache_ip_to_name
     dns_cache_ip_to_name = {}
     global dns_cache_ip_expires
@@ -85,9 +87,9 @@ def init():
     all_vb_json_str = ""
     global trap_uuids_in_buffer
     trap_uuids_in_buffer = ""
-    # </trap and varbind dictionaries> 
+    # </trap and varbind dictionaries>
 
-    # <publish timers and counters> 
+    # <publish timers and counters>
     global traps_in_minute
     traps_in_minute = 0
     global last_epoch_second
@@ -104,12 +106,12 @@ def init():
     seconds_between_retries = 2
     global publisher_retries
     publisher_retries = 2
-    # </publish timers and counters> 
+    # </publish timers and counters>
 
-    # <publish http request session (persistent as much as possible)> 
+    # <publish http request session (persistent as much as possible)>
     global http_requ_session
     http_requ_session = None
-    # </publish http request session> 
+    # </publish http request session>
 
     # <json log of traps published>
     global json_traps_filename
@@ -159,10 +161,9 @@ def init():
     SEV_FATAL = 5
 
     global CODE_GENERAL
-    CODE_GENERAL="100"
+    CODE_GENERAL = "100"
 
     global minimum_severity_to_log
-    minimum_severity_to_log=3
-
+    minimum_severity_to_log = 3
 
     # </logging types and severities>
