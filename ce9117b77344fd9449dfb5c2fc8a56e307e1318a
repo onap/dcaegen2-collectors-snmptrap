@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_2a43c413",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 51
+      },
+      "writtenOn": "2018-03-19T03:32:50Z",
+      "side": 1,
+      "message": "you probably meant ${APPDIR}",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 14
+      },
+      "revId": "ce9117b77344fd9449dfb5c2fc8a56e307e1318a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ca4d803f",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 51
+      },
+      "writtenOn": "2018-03-19T03:32:50Z",
+      "side": 1,
+      "message": "you probably meant ${APPDIR}",
+      "revId": "ce9117b77344fd9449dfb5c2fc8a56e307e1318a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
