@@ -29,9 +29,6 @@ import os
 import requests
 import traceback
 
-# snmptrapd
-import trapd_settings
-
 prog_name = os.path.basename(__file__)
 
 

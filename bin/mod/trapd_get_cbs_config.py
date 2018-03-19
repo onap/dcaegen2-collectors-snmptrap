@@ -20,7 +20,7 @@
 #
 """
 Look for CBS broker and return application config; if not present, look for
-env variable that specifies JSON equiv of CBS config (typically used for 
+env variable that specifies JSON equiv of CBS config (typically used for
 testing purposes)
 """
 
@@ -63,54 +63,56 @@ def get_cbs_config():
         if tds.c_config == {}:
             msg = "Unable to fetch CBS config or it is erroneously empty - trying override/simulator config"
             stdout_logger(msg)
-    
+
     # if no CBS present, default to JSON config specified via CBS_SIM_JSON env var
     except Exception as e:
         msg = "ONAP controller not present, trying json config override via CBS_SIM_JSON env variable"
         stdout_logger(msg)
-    
+
         try:
             _cbs_sim_json_file = os.getenv("CBS_SIM_JSON", "None")
         except Exception as e:
             msg = "CBS_SIM_JSON not defined - FATAL ERROR, exiting"
             stdout_logger(msg)
             cleanup_and_exit(1, pid_file_name)
-    
+
         if _cbs_sim_json_file == "None":
             msg = "CBS_SIM_JSON not defined - FATAL ERROR, exiting"
             stdout_logger(msg)
             cleanup_and_exit(1, pid_file_name)
         else:
-            msg = ("ONAP controller override specified via CBS_SIM_JSON: %s" % _cbs_sim_json_file )
+            msg = ("ONAP controller override specified via CBS_SIM_JSON: %s" %
+                   _cbs_sim_json_file)
             stdout_logger(msg)
             try:
                 tds.c_config = json.load(open(_cbs_sim_json_file))
             except Exception as e:
-                msg = "Unable to load CBS_SIM_JSON " + _cbs_sim_json_file + " (invalid json?) - FATAL ERROR, exiting"
+                msg = "Unable to load CBS_SIM_JSON " + _cbs_sim_json_file + \
+                    " (invalid json?) - FATAL ERROR, exiting"
                 stdout_logger(msg)
                 cleanup_and_exit(1, tds.pid_file_name)
 
     # recalc timeout, set default if not present
     try:
         tds.timeout_seconds = tds.c_config['publisher.http_timeout_milliseconds'] / 1000.0
-    except:
+    except Exception as e:
         tds.timeout_seconds = 1.5
 
     # recalc seconds_between_retries, set default if not present
     try:
         tds.seconds_between_retries = tds.c_config['publisher.http_milliseconds_between_retries'] / 1000.0
-    except:
+    except Exception as e:
         tds.seconds_between_retries = .750
 
     # recalc min_severity_to_log, set default if not present
     try:
         tds.minimum_severity_to_log = tds.c_config['files.minimum_severity_to_log']
-    except:
+    except Exception as e:
         tds.minimum_severity_to_log = 3
 
     try:
         tds.publisher_retries = tds.c_config['publisher.http_retries']
-    except:
+    except Exception as e:
         tds.publisher_retries = 3
 
     return True

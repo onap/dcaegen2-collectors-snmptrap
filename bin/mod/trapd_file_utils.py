@@ -60,8 +60,8 @@ def roll_all_logs():
     # NOTE:  this will go away when onap logging is standardized/available
     try:
         # open various ecomp logs - if any fails, exit
-        for fd in [tds.eelf_error_fd, tds.eelf_debug_fd, tds.eelf_audit_fd, \
-                tds.eelf_metrics_fd, tds.arriving_traps_fd, tds.json_traps_fd]:
+        for fd in [tds.eelf_error_fd, tds.eelf_debug_fd, tds.eelf_audit_fd,
+                   tds.eelf_metrics_fd, tds.arriving_traps_fd, tds.json_traps_fd]:
             fd.close()
 
         roll_file(tds.eelf_error_file_name)
@@ -86,7 +86,8 @@ def roll_all_logs():
     try:
         tds.json_traps_fd = open_file(tds.json_traps_filename)
     except Exception as e:
-        msg = ("Error opening json_log %s : %s" % (json_traps_filename, str(e)))
+        msg = ("Error opening json_log %s : %s" %
+               (json_traps_filename, str(e)))
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
@@ -96,11 +97,11 @@ def roll_all_logs():
     try:
         tds.arriving_traps_fd = open_file(tds.arriving_traps_filename)
     except Exception as e:
-        msg = ("Error opening arriving traps %s : %s" % (arriving_traps_filename, str(e)))
+        msg = ("Error opening arriving traps %s : %s" %
+               (arriving_traps_filename, str(e)))
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
-    
 
 # # # # # # # # # # # # # # # # # # #
 # fx: setup_ecomp_logs -> log in eelf format until standard
@@ -116,7 +117,8 @@ def open_eelf_logs():
     try:
         # open various ecomp logs - if any fails, exit
 
-        tds.eelf_error_file_name = (tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_error'])
+        tds.eelf_error_file_name = (
+            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_error'])
         tds.eelf_error_fd = open_file(tds.eelf_error_file_name)
 
     except Exception as e:
@@ -124,9 +126,9 @@ def open_eelf_logs():
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
-
     try:
-        tds.eelf_debug_file_name = (tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_debug'])
+        tds.eelf_debug_file_name = (
+            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_debug'])
         tds.eelf_debug_fd = open_file(tds.eelf_debug_file_name)
 
     except Exception as e:
@@ -135,7 +137,8 @@ def open_eelf_logs():
         cleanup_and_exit(1, tds.pid_file_name)
 
     try:
-        tds.eelf_audit_file_name = (tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_audit'])
+        tds.eelf_audit_file_name = (
+            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_audit'])
         tds.eelf_audit_fd = open_file(tds.eelf_audit_file_name)
     except Exception as e:
         msg = "Error opening eelf audit log : " + str(e)
@@ -143,7 +146,8 @@ def open_eelf_logs():
         cleanup_and_exit(1, tds.pid_file_name)
 
     try:
-        tds.eelf_metrics_file_name = (tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_metrics'])
+        tds.eelf_metrics_file_name = (
+            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_metrics'])
         tds.eelf_metrics_fd = open_file(tds.eelf_metrics_file_name)
     except Exception as e:
         msg = "Error opening eelf metric log : " + str(e)
@@ -163,8 +167,8 @@ def roll_file(_loc_file_name):
     """
 
     _file_name_suffix = "%s" % (datetime.datetime.fromtimestamp(time.time()).
-                                  fromtimestamp(time.time()).
-                                  strftime('%Y-%m-%dT%H:%M:%S'))
+                                fromtimestamp(time.time()).
+                                strftime('%Y-%m-%dT%H:%M:%S'))
 
     _loc_file_name_bak = _loc_file_name + '.' + _file_name_suffix
 
@@ -172,11 +176,12 @@ def roll_file(_loc_file_name):
     if os.path.isfile(_loc_file_name):
         try:
             os.rename(_loc_file_name, _loc_file_name_bak)
-        except:
+        except Exception as e:
             _msg = ("ERROR: Unable to rename %s to %s"
-                                % (_loc_file_name,
-                                   _loc_file_name_bak))
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_CRIT, tds.CODE_GENERAL, _msg)
+                    % (_loc_file_name,
+                       _loc_file_name_bak))
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_CRIT,
+                         tds.CODE_GENERAL, _msg)
 
 
 # # # # # # # # # # # # #
@@ -188,7 +193,6 @@ def open_file(_loc_file_name):
     """
     open _loc_file_name, return file handle
     """
-
 
     try:
         # open append mode just in case so nothing is lost, but should be
@@ -215,6 +219,7 @@ def close_file(_loc_fd, _loc_filename):
         _loc_fd.close()
         return True
     except Exception as e:
-        msg = "Error closing %s : %s - results indeterminate" % (_loc_filename, str(e))
+        msg = "Error closing %s : %s - results indeterminate" % (
+            _loc_filename, str(e))
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
         return False
