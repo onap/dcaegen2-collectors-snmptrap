@@ -24,7 +24,8 @@ RUN mkdir -p ${APPDIR}/data \
  && chmod a+w ${APPDIR}/tmp \
  && chmod 500 ${APPDIR}/etc \
  && chmod 500 ${APPDIR}/bin/snmptrapd.sh 
- 
+
+RUN python setup.py install 
 
 USER ${APPUSER}
 
