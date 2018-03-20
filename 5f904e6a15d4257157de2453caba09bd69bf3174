@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Lusheng Ji <lji@research.att.com>
+Submitted-by: Lusheng Ji <lji@research.att.com>
+Submitted-at: Tue, 20 Mar 2018 21:20:13 +0000
+Reviewed-on: https://gerrit.onap.org/r/37249
+Project: dcaegen2/collectors/snmptrap
+Branch: refs/heads/master
