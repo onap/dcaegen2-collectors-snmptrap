@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b4cf28b3",
+        "filename": "requirements.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2018-03-21T14:16:45Z",
+      "side": 1,
+      "message": "leaving open-ended version could introduce issue if new library is released and not compatible.",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 34
+      },
+      "revId": "6415d36bb3f2b03797e8a5abfcee2d71cf2c8aac",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
