@@ -9,7 +9,7 @@ RUN useradd -d ${APPDIR} ${APPUSER}
 
 WORKDIR ${APPDIR}
 
-EXPOSE 162
+EXPOSE 162:162/udp
 
 # Copy the current directory contents into the container at ${APPDIR}
 COPY ./bin/ ./bin/
