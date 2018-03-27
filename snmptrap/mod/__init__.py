@@ -1,6 +1,5 @@
-# org.onap.dcae
 # ================================================================================
-# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,26 +16,6 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 
-import os
-import string
-import sys
-import setuptools
-from setuptools import setup, find_packages
 
-
-setup(
-    name = "snmptrap",
-    description = "snmp trap receiver for ONAP docker image",
-    version = "1.3.0",
-    packages=find_packages(),
-    install_requires=[
-	"pysnmp==4.4.2",
-	"requests==2.18.3",
-	"onap_dcae_cbs_docker_client==0.0.3"
-    ],
-    author = "Dave L",
-    author_email = "dl3158@att.com",
-    license='Apache 2',
-    keywords = "",
-    url = ""
-)
+# empty __init__.py so that pytest can add correct path to coverage report, -- per pytest
+# best practice guideline

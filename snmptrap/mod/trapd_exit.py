@@ -56,8 +56,8 @@ def cleanup_and_exit(_loc_exit_code, _pid_file_name):
         number of parameters passed to module
     """
 
-    _num_params = len(locals())
+    # _num_params = len(locals())
 
-    if _num_params == 2:
+    if _pid_file_name is not None:
         rc = rm_pid(_pid_file_name)
     sys.exit(_loc_exit_code)

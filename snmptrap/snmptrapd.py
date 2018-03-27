@@ -73,8 +73,7 @@ from trapd_get_cbs_config import get_cbs_config
 from trapd_exit import cleanup_and_exit
 from trapd_http_session import init_session_obj
 
-from trapd_file_utils import roll_all_logs, open_eelf_logs, roll_file, open_file, close_file
-from trapd_logging import ecomp_logger, stdout_logger
+from trapd_io import roll_all_logs, open_eelf_logs, roll_file, open_file, close_file, ecomp_logger, stdout_logger
 
 prog_name = os.path.basename(__file__)
 verbose = False
@@ -146,7 +145,18 @@ def load_all_configs(_signum, _frame):
         msg = "error (re)loading CBS config - FATAL ERROR, exiting"
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
+    else:
+        current_runtime_config_file_name = tds.c_config['files.runtime_base_dir'] + \
+            "/tmp/current_config.json"
 
+        msg = "current config logged to : %s" % current_runtime_config_file_name
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+
+        with open(current_runtime_config_file_name, 'w') as outfile:
+            json.dump(tds.c_config, outfile)
+
+        # if here, config re-read successfully
+        return True
 
 # # # # # # # # # # # # #
 # fx: log_all_arriving_traps
@@ -624,181 +634,184 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
 # Main  MAIN  Main  MAIN
 # # # # # # # # # # # # #
 # parse command line args
-parser = argparse.ArgumentParser(description='Post SNMP traps '
-                                             'to message bus')
-parser.add_argument('-v', action="store_true", dest="verbose",
-                    help="verbose logging")
-parser.add_argument('-?', action="store_true", dest="usage_requested",
-                    help="show command line use")
 
-# parse args
-args = parser.parse_args()
+if __name__ == "__main__":
 
-# set vars from args
-verbose = args.verbose
-usage_requested = args.usage_requested
-
-# if usage, just display and exit
-if usage_requested:
-    usage_err()
-
-# init vars
-tds.init()
-
-# Set initial startup hour for rolling logfile
-tds.last_hour = datetime.datetime.now().hour
-
-# get config binding service (CBS) values (either broker, or json file override)
-load_all_configs(0, 0)
-msg = "%s : %s version %s starting" % (
-    prog_name, tds.c_config['snmptrap.title'], tds.c_config['snmptrap.version'])
-stdout_logger(msg)
-
-# Avoid this unless needed for testing; it prints sensitive data to log
-#
-# msg = "Running config: "
-# stdout_logger(msg)
-# msg = json.dumps(c_config, sort_keys=False, indent=4)
-# stdout_logger(msg)
-
-# open various ecomp logs
-open_eelf_logs()
-
-# bump up logging level if overridden at command line
-if verbose:
-    msg = "WARNING:  '-v' argument present.  All messages will be logged.  This can slow things down, use only when needed."
-    tds.minimum_severity_to_log = 0
+    parser = argparse.ArgumentParser(description='Post SNMP traps '
+                                                 'to message bus')
+    parser.add_argument('-v', action="store_true", dest="verbose",
+                        help="verbose logging")
+    parser.add_argument('-?', action="store_true", dest="usage_requested",
+                        help="show command line use")
+    
+    # parse args
+    args = parser.parse_args()
+    
+    # set vars from args
+    verbose = args.verbose
+    usage_requested = args.usage_requested
+    
+    # if usage, just display and exit
+    if usage_requested:
+        usage_err()
+    
+    # init vars
+    tds.init()
+    
+    # Set initial startup hour for rolling logfile
+    tds.last_hour = datetime.datetime.now().hour
+    
+    # get config binding service (CBS) values (either broker, or json file override)
+    load_all_configs(0, 0)
+    msg = "%s : %s version %s starting" % (
+        prog_name, tds.c_config['snmptrap.title'], tds.c_config['snmptrap.version'])
     stdout_logger(msg)
-
-# name and open arriving trap log
-tds.arriving_traps_filename = tds.c_config['files.runtime_base_dir'] + "/" + \
-    tds.c_config['files.log_dir'] + "/" + \
-    (tds.c_config['files.arriving_traps_log'])
-tds.arriving_traps_fd = open_file(tds.arriving_traps_filename)
-msg = ("arriving traps logged to: %s" % tds.arriving_traps_filename)
-stdout_logger(msg)
-ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
-
-# name and open json trap log
-tds.json_traps_filename = tds.c_config['files.runtime_base_dir'] + "/" + tds.c_config['files.log_dir'] + "/" + "DMAAP_" + (
-    tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'].split('/')[-1]) + ".json"
-tds.json_traps_fd = open_file(tds.json_traps_filename)
-msg = ("published traps logged to: %s" % tds.json_traps_filename)
-stdout_logger(msg)
-ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
-
-# setup signal handling for config reload
-signal.signal(signal.SIGUSR1, load_all_configs)
-
-# save current PID for future/external reference
-tds.pid_file_name = tds.c_config['files.runtime_base_dir'] + \
-    '/' + tds.c_config['files.pid_dir'] + '/' + prog_name + ".pid"
-msg = "Runtime PID file: %s" % tds.pid_file_name
-ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
-rc = save_pid(tds.pid_file_name)
-
-# Get the event loop for this thread
-loop = asyncio.get_event_loop()
-
-# Create SNMP engine with autogenernated engineID pre-bound
-# to socket transport dispatcher
-snmp_engine = engine.SnmpEngine()
-
-# # # # # # # # # # # #
-# Transport setup
-# # # # # # # # # # # #
-
-# UDP over IPv4
-# FIXME:  add check for presense of ipv4_interface prior to attempting add OR just put entire thing in try/except clause
-try:
-    ipv4_interface = tds.c_config['protocols.ipv4_interface']
-    ipv4_port = tds.c_config['protocols.ipv4_port']
-
-    try:
-        config.addTransport(
-            snmp_engine,
-            udp.domainName + (1,),
-            udp.UdpTransport().openServerMode(
-                (ipv4_interface, ipv4_port))
-        )
-    except Exception as e:
-        msg = "Unable to bind to %s:%s - %s" % (
-            ipv4_interface, ipv4_port, str(e))
-        ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
+    
+    # Avoid this unless needed for testing; it prints sensitive data to log
+    #
+    # msg = "Running config: "
+    # stdout_logger(msg)
+    # msg = json.dumps(c_config, sort_keys=False, indent=4)
+    # stdout_logger(msg)
+    
+    # open various ecomp logs
+    open_eelf_logs()
+    
+    # bump up logging level if overridden at command line
+    if verbose:
+        msg = "WARNING:  '-v' argument present.  All diagnostic messages will be logged.  This can slow things down, use only when needed."
+        tds.minimum_severity_to_log = 0
         stdout_logger(msg)
-        cleanup_and_exit(1, tds.pid_file_name)
-
-except Exception as e:
-    msg = "IPv4 interface and/or port not specified in config - not listening for IPv4 traps"
+    
+    # name and open arriving trap log
+    tds.arriving_traps_filename = tds.c_config['files.runtime_base_dir'] + "/" + \
+        tds.c_config['files.log_dir'] + "/" + \
+        (tds.c_config['files.arriving_traps_log'])
+    tds.arriving_traps_fd = open_file(tds.arriving_traps_filename)
+    msg = ("arriving traps logged to: %s" % tds.arriving_traps_filename)
     stdout_logger(msg)
-    ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
-
-
-# UDP over IPv4, second listening interface/port example if you don't want to listen on all
-# config.addTransport(
-#     snmp_engine,
-#     udp.domainName + (2,),
-#     udp.UdpTransport().openServerMode(('127.0.0.1', 2162))
-# )
-
-
-# UDP over IPv6
-# FIXME:  add check for presense of ipv6_interface prior to attempting add OR just put entire thing in try/except clause
-try:
-    ipv6_interface = tds.c_config['protocols.ipv6_interface']
-    ipv6_port = tds.c_config['protocols.ipv6_port']
-
+    ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+    
+    # name and open json trap log
+    tds.json_traps_filename = tds.c_config['files.runtime_base_dir'] + "/" + tds.c_config['files.log_dir'] + "/" + "DMAAP_" + (
+        tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'].split('/')[-1]) + ".json"
+    tds.json_traps_fd = open_file(tds.json_traps_filename)
+    msg = ("published traps logged to: %s" % tds.json_traps_filename)
+    stdout_logger(msg)
+    ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+    
+    # setup signal handling for config reload
+    signal.signal(signal.SIGUSR1, load_all_configs)
+    
+    # save current PID for future/external reference
+    tds.pid_file_name = tds.c_config['files.runtime_base_dir'] + \
+        '/' + tds.c_config['files.pid_dir'] + '/' + prog_name + ".pid"
+    msg = "Runtime PID file: %s" % tds.pid_file_name
+    ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+    rc = save_pid(tds.pid_file_name)
+    
+    # Get the event loop for this thread
+    loop = asyncio.get_event_loop()
+    
+    # Create SNMP engine with autogenernated engineID pre-bound
+    # to socket transport dispatcher
+    snmp_engine = engine.SnmpEngine()
+    
+    # # # # # # # # # # # #
+    # Transport setup
+    # # # # # # # # # # # #
+    
+    # UDP over IPv4
+    # FIXME:  add check for presense of ipv4_interface prior to attempting add OR just put entire thing in try/except clause
     try:
-        config.addTransport(
-            snmp_engine,
-            udp6.domainName,
-            udp6.Udp6Transport().openServerMode(
-                (ipv6_interface, ipv6_port))
-        )
+        ipv4_interface = tds.c_config['protocols.ipv4_interface']
+        ipv4_port = tds.c_config['protocols.ipv4_port']
+    
+        try:
+            config.addTransport(
+                snmp_engine,
+                udp.domainName + (1,),
+                udp.UdpTransport().openServerMode(
+                    (ipv4_interface, ipv4_port))
+            )
+        except Exception as e:
+            msg = "Unable to bind to %s:%s - %s" % (
+                ipv4_interface, ipv4_port, str(e))
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
+            stdout_logger(msg)
+            cleanup_and_exit(1, tds.pid_file_name)
+    
     except Exception as e:
-        msg = "Unable to bind to %s:%s - %s" % (
-            ipv6_interface, ipv6_port, str(e))
+        msg = "IPv4 interface and/or port not specified in config - not listening for IPv4 traps"
         stdout_logger(msg)
-        ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
+        ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
+    
+    
+    # UDP over IPv4, second listening interface/port example if you don't want to listen on all
+    # config.addTransport(
+    #     snmp_engine,
+    #     udp.domainName + (2,),
+    #     udp.UdpTransport().openServerMode(('127.0.0.1', 2162))
+    # )
+    
+    
+    # UDP over IPv6
+    # FIXME:  add check for presense of ipv6_interface prior to attempting add OR just put entire thing in try/except clause
+    try:
+        ipv6_interface = tds.c_config['protocols.ipv6_interface']
+        ipv6_port = tds.c_config['protocols.ipv6_port']
+    
+        try:
+            config.addTransport(
+                snmp_engine,
+                udp6.domainName,
+                udp6.Udp6Transport().openServerMode(
+                    (ipv6_interface, ipv6_port))
+            )
+        except Exception as e:
+            msg = "Unable to bind to %s:%s - %s" % (
+                ipv6_interface, ipv6_port, str(e))
+            stdout_logger(msg)
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
+            cleanup_and_exit(1, tds.pid_file_name)
+    
+    except Exception as e:
+        msg = "IPv6 interface and/or port not specified in config - not listening for IPv6 traps"
+        stdout_logger(msg)
+        ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
+    
+    
+    # # # # # # # # # # # #
+    # SNMPv1/2c setup
+    # # # # # # # # # # # #
+    
+    # SecurityName <-> CommunityName mapping
+    #     to restrict trap reception to only those with specific community
+    #     strings
+    config.addV1System(snmp_engine, 'my-area', 'public')
+    
+    # register comm_string_rewrite_observer for message arrival
+    snmp_engine.observer.registerObserver(
+        comm_string_rewrite_observer,
+        'rfc2576.processIncomingMsg:writable'
+    )
+    
+    # register snmp_engine_observer_cb for message arrival
+    snmp_engine.observer.registerObserver(
+        snmp_engine_observer_cb,
+        'rfc3412.receiveMessage:request',
+        'rfc3412.returnResponsePdu',
+    )
+    
+    # Register SNMP Application at the SNMP engine
+    ntfrcv.NotificationReceiver(snmp_engine, notif_receiver_cb)
+    
+    snmp_engine.transportDispatcher.jobStarted(1)  # loop forever
+    
+    # Run I/O dispatcher which will receive traps
+    try:
+        snmp_engine.transportDispatcher.runDispatcher()
+    except Exception as e:
+        snmp_engine.observer.unregisterObserver()
+        snmp_engine.transportDispatcher.closeDispatcher()
         cleanup_and_exit(1, tds.pid_file_name)
-
-except Exception as e:
-    msg = "IPv6 interface and/or port not specified in config - not listening for IPv6 traps"
-    stdout_logger(msg)
-    ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
-
-
-# # # # # # # # # # # #
-# SNMPv1/2c setup
-# # # # # # # # # # # #
-
-# SecurityName <-> CommunityName mapping
-#     to restrict trap reception to only those with specific community
-#     strings
-config.addV1System(snmp_engine, 'my-area', 'public')
-
-# register comm_string_rewrite_observer for message arrival
-snmp_engine.observer.registerObserver(
-    comm_string_rewrite_observer,
-    'rfc2576.processIncomingMsg:writable'
-)
-
-# register snmp_engine_observer_cb for message arrival
-snmp_engine.observer.registerObserver(
-    snmp_engine_observer_cb,
-    'rfc3412.receiveMessage:request',
-    'rfc3412.returnResponsePdu',
-)
-
-# Register SNMP Application at the SNMP engine
-ntfrcv.NotificationReceiver(snmp_engine, notif_receiver_cb)
-
-snmp_engine.transportDispatcher.jobStarted(1)  # loop forever
-
-# Run I/O dispatcher which will receive traps
-try:
-    snmp_engine.transportDispatcher.runDispatcher()
-except Exception as e:
-    snmp_engine.observer.unregisterObserver()
-    snmp_engine.transportDispatcher.closeDispatcher()
-    cleanup_and_exit(1, tds.pid_file_name)

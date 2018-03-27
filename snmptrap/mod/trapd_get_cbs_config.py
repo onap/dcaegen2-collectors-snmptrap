@@ -37,7 +37,7 @@ import collections
 import trapd_settings as tds
 from onap_dcae_cbs_docker_client.client import get_config
 from trapd_exit import cleanup_and_exit
-from trapd_logging import stdout_logger
+from trapd_io import stdout_logger
 
 prog_name = os.path.basename(__file__)
 
@@ -74,12 +74,12 @@ def get_cbs_config():
         except Exception as e:
             msg = "CBS_SIM_JSON not defined - FATAL ERROR, exiting"
             stdout_logger(msg)
-            cleanup_and_exit(1, pid_file_name)
+            cleanup_and_exit(1,None)
 
         if _cbs_sim_json_file == "None":
             msg = "CBS_SIM_JSON not defined - FATAL ERROR, exiting"
             stdout_logger(msg)
-            cleanup_and_exit(1, pid_file_name)
+            cleanup_and_exit(1,None)
         else:
             msg = ("ONAP controller override specified via CBS_SIM_JSON: %s" %
                    _cbs_sim_json_file)
@@ -90,7 +90,7 @@ def get_cbs_config():
                 msg = "Unable to load CBS_SIM_JSON " + _cbs_sim_json_file + \
                     " (invalid json?) - FATAL ERROR, exiting"
                 stdout_logger(msg)
-                cleanup_and_exit(1, tds.pid_file_name)
+                cleanup_and_exit(1,None)
 
     # recalc timeout, set default if not present
     try:
