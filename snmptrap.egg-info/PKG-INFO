@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: snmptrap
+Version: 1.3.0
+Summary: snmp trap receiver for ONAP docker image
+Home-page: UNKNOWN
+Author: Dave L
+Author-email: dl3158@att.com
+License: Apache 2
+Description: UNKNOWN
+Platform: UNKNOWN
