@@ -1,6 +1,7 @@
 import pytest
 import unittest
-import trapd_http_session
+#from snmptrap import trapd_http_session
+import snmptrap.mod.trapd_http_session as trapd_http_session
  
 class test_init_session_obj(unittest.TestCase):
     """

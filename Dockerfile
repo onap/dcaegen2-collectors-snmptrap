@@ -12,7 +12,7 @@ WORKDIR ${APPDIR}
 EXPOSE 162:162/udp
 
 # Copy the current directory contents into the container at ${APPDIR}
-COPY ./bin/ ./bin/
+COPY ./snmptrap/ ./bin/
 COPY ./etc/ ./etc/
 COPY requirements.txt ./
 RUN pip install -r requirements.txt

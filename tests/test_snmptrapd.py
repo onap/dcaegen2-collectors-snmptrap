@@ -1,6 +1,6 @@
 import pytest
 import unittest
-import trapd_runtime_pid
+import snmptrap.mod.trapd_runtime_pid as trapd_runtime_pid
  
 class test_save_pid(unittest.TestCase):
     """

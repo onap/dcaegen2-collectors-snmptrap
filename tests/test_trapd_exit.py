@@ -1,6 +1,6 @@
 import pytest
 import unittest
-import trapd_exit
+import snmptrap.mod.trapd_exit as trapd_exit
 
 pid_file="/tmp/test_pid_file"
 pid_file_dne="/tmp/test_pid_file_NOT"
