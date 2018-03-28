@@ -25,61 +25,21 @@ echo "running script: [$0] for module [$1] at stage [$2]"
 
 MVN_PROJECT_MODULEID="$1"
 MVN_PHASE="$2"
+PROJECT_ROOT=$(dirname $0)
 
 
-FQDN="${MVN_PROJECT_GROUPID}.${MVN_PROJECT_ARTIFACTID}"
-if [ "$MVN_PROJECT_MODULEID" == "__" ]; then
-  MVN_PROJECT_MODULEID=""
-fi
-
-if [[ "$MVN_PROJECT_VERSION" == *SNAPSHOT ]]; then
-  echo "=> for SNAPSHOT artifact build"
-  MVN_DEPLOYMENT_TYPE='SNAPSHOT'
+echo "MVN_RELEASE_TAG is set to [$MVN_RELEASE_TAG]"
+RELEASE_TAG=${MVN_RELEASE_TAG:-R2}
+if [ "$RELEASE_TAG" != "R1" ]; then
+  RELEASE_TAGGED_DIR="${RELEASE_TAG}/"
 else
-  echo "=> for STAGING/RELEASE artifact build"
-  MVN_DEPLOYMENT_TYPE='STAGING'
+  RELEASE_TAGGED_DIR=""
 fi
-echo "MVN_DEPLOYMENT_TYPE is             [$MVN_DEPLOYMENT_TYPE]"
-
-
-TIMESTAMP=$(date +%C%y%m%dT%H%M%S)
-
-# expected environment variables
-if [ -z "${MVN_NEXUSPROXY}" ]; then
-    echo "MVN_NEXUSPROXY environment variable not set.  Cannot proceed"
-    exit
+if ! wget -O ${PROJECT_ROOT}/mvn-phase-lib.sh \
+  "$MVN_RAWREPO_BASEURL_DOWNLOAD"/org.onap.dcaegen2.utils/${RELEASE_TAGGED_DIR}scripts/mvn-phase-lib.sh; then
+  echo "Fail to download mvn-phase-lib.sh"
+  exit 1
 fi
-MVN_NEXUSPROXY_HOST=$(echo "$MVN_NEXUSPROXY" |cut -f3 -d'/' | cut -f1 -d':')
-echo "=> Nexus Proxy at $MVN_NEXUSPROXY_HOST, $MVN_NEXUSPROXY"
-
-if [ -z "$WORKSPACE" ]; then
-    WORKSPACE=$(pwd)
-fi
-
-#if [ -z "$SETTINGS_FILE" ]; then
-#    echo "SETTINGS_FILE environment variable not set.  Cannot proceed"
-#    exit
-#fi
-   
-
-
-# mvn phase in life cycle
-MVN_PHASE="$2"
-
-
-echo "MVN_PROJECT_MODULEID is            [$MVN_PROJECT_MODULEID]"
-echo "MVN_PHASE is                       [$MVN_PHASE]"
-echo "MVN_PROJECT_GROUPID is             [$MVN_PROJECT_GROUPID]"
-echo "MVN_PROJECT_ARTIFACTID is          [$MVN_PROJECT_ARTIFACTID]"
-echo "MVN_PROJECT_VERSION is             [$MVN_PROJECT_VERSION]"
-echo "MVN_NEXUSPROXY is                  [$MVN_NEXUSPROXY]"
-echo "MVN_RAWREPO_BASEURL_UPLOAD is      [$MVN_RAWREPO_BASEURL_UPLOAD]"
-echo "MVN_RAWREPO_BASEURL_DOWNLOAD is    [$MVN_RAWREPO_BASEURL_DOWNLOAD]"
-MVN_RAWREPO_HOST=$(echo "$MVN_RAWREPO_BASEURL_UPLOAD" | cut -f3 -d'/' |cut -f1 -d':')
-echo "MVN_RAWREPO_HOST is                [$MVN_RAWREPO_HOST]"
-echo "MVN_RAWREPO_SERVERID is            [$MVN_RAWREPO_SERVERID]"
-echo "MVN_DOCKERREGISTRY_DAILY is        [$MVN_DOCKERREGISTRY_DAILY]"
-echo "MVN_DOCKERREGISTRY_RELEASE is      [$MVN_DOCKERREGISTRY_RELEASE]"
 
 
 source ./mvn-phase-lib.sh 
@@ -102,6 +62,7 @@ compile)
   ;;
 test)
   echo "==> test phase script"
+  run_tox_test
   ;;
 package)
   echo "==> package phase script"
