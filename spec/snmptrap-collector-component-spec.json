@@ -100,7 +100,7 @@
                     },
                     {
                         "name": "files.runtime_base_dir",
-                        "value":"/opt/app/snmptrap",
+                        "value":"/tmp/opt/app/snmptrap",
                         "description": "base dir of snmptrapd install"
                     },
                     {
@@ -140,7 +140,7 @@
                     },
                     {
                         "name": "files.eelf_base_dir",
-                        "value":"/opt/app/snmptrap/logs",
+                        "value":"/tmp/opt/app/snmptrap/logs",
                         "description": "directory that all EELF format logs will be written to"
                     },
                     {

@@ -36,7 +36,7 @@ class test_snmptrapd(unittest.TestCase):
         tds.init()
 
         # request load of CBS data
-        os.environ.update(CBS_SIM_JSON='/opt/app/snmptrap/etc/snmptrapd.json')
+        #os.environ.update(CBS_SIM_JSON='/opt/app/snmptrap/etc/snmptrapd.json')
         result = trapd_get_cbs_config.get_cbs_config()
         self.assertEqual(result, True)
 
@@ -53,7 +53,7 @@ class test_snmptrapd(unittest.TestCase):
         tds.init()
 
         # request load of CBS data
-        os.environ.update(CBS_SIM_JSON='/opt/app/snmptrap/etc/snmptrapd.json')
+        #os.environ.update(CBS_SIM_JSON='/opt/app/snmptrap/etc/snmptrapd.json')
         result = trapd_get_cbs_config.get_cbs_config()
 
         # set last day to current
