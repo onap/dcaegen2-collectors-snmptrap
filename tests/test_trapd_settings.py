@@ -6,7 +6,6 @@ pid_file="/tmp/test_pid_file"
 pid_file_dne="/tmp/test_pid_file_NOT"
 
 import trapd_settings as tds
-from conftest import test_var
 
 class test_cleanup_and_exit(unittest.TestCase):
     """

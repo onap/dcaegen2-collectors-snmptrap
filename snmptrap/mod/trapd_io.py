@@ -175,13 +175,16 @@ def roll_file(_loc_file_name):
     if os.path.isfile(_loc_file_name):
         try:
             os.rename(_loc_file_name, _loc_file_name_bak)
+            return True
         except Exception as e:
             _msg = ("ERROR: Unable to rename %s to %s"
                     % (_loc_file_name,
                        _loc_file_name_bak))
             ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_CRIT,
                          tds.CODE_GENERAL, _msg)
+            return False
 
+    return False
 
 # # # # # # # # # # # # #
 # fx: open_log_file
@@ -304,16 +307,12 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
 
     unused = ""
 
-    # ct = time.time()
-    # lt = time.localtime(ct)
-    # t_hman = time.strftime(DateFmt, lt)
-    # t_ms = (ct - int(ct)) * 1000
     # above were various attempts at setting time string found in other
     # libs; instead, let's keep it real:
     t_out = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S,%f")[:-3]
     calling_fx = inspect.stack()[1][3]
 
-    # FIXME: this entire module is a hack to override concept of prog logging
+    # DLFM: this entire module is a hack to override concept of prog logging
     #        written across multiple files (???), making diagnostics IMPOSSIBLE!
     #        Hoping to leverage ONAP logging libraries & standards when available
 
@@ -321,7 +320,7 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
     if _log_type < 1 or _log_type > 5:
         msg = ("INVALID log type: %s " % _log_type)
         _out_rec = ("%s|%s|%s|%s|%s|%s|%s|%s|%s"
-                    % ((calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, (msg + _msg))))
+                    % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, (msg + _msg)))
         try:
             tds.eelf_error_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
         except Exception as e:
@@ -333,7 +332,7 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
         # log to appropriate eelf log (different files ??)
         if _log_type == tds.LOG_TYPE_ERROR:
             _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
-                        % ((calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg)))
+                        % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
             try:
                 tds.eelf_error_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
             except Exception as e:
@@ -341,7 +340,7 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
         elif _log_type == tds.LOG_TYPE_AUDIT:
             # log message in AUDIT format
             _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
-                        % ((calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg)))
+                        % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
             try:
                 tds.eelf_audit_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
             except Exception as e:
@@ -349,20 +348,18 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
         elif _log_type == tds.LOG_TYPE_METRICS:
             # log message in METRICS format
             _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
-                        % ((calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg)))
+                        % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
             try:
                 tds.eelf_metrics_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
 
         # DEBUG *AND* others - there *MUST BE* a single time-sequenced log for diagnostics!
-        # FIXME: too much I/O !!!
+        # DLFM: too much I/O !!!
         # always write to debug; we need ONE logfile that has time-sequence full view !!!
-        # if (_log_type == tds.LOG_TYPE_DEBUG and _sev >= tds.current_min_sev_log_level) or (_log_type != tds.LOG_TYPE_DEBUG):
-
         # log message in DEBUG format
         _out_rec = ("%s|%s|%s|%s|%s|%s|%s|%s|%s"
-                    % ((calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg)))
+                    % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
         try:
             tds.eelf_debug_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
         except Exception as e:
@@ -391,6 +388,5 @@ def stdout_logger(_msg):
     """
 
     t_out = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S,%f")[:-3]
-    # calling_fx = inspect.stack()[1][3]
 
     print('%s %s' % (t_out, _msg))

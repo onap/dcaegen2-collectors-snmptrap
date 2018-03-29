@@ -21,7 +21,6 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-
 # get to where we are supposed to be for startup
 cd /opt/app/snmptrap/bin
 
@@ -37,8 +36,6 @@ export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-bundle.crt
 # PYTHONUNBUFFERED:
 #    set PYTHONUNBUFFERED to a non-empty string to avoid output buffering; 
 #    comment out for runtime environments/better performance!
-# FIXME: This does *NOT* appear to work as desired, so
-#        we've added "-u" to command line below
 # export PYTHONUNBUFFERED="True"
 
 # set location of config broker server overrride IF NEEDED
@@ -47,8 +44,12 @@ export CBS_SIM_JSON=../etc/snmptrapd.json
 
 # want tracing?  Use this:
 # python -m trace --trackcalls snmptrapd.py -v
+
 # want verbose logging?  Use this:
-# python -u snmptrapd.py -v
+# python snmptrapd.py -v
+
 # standard startup?  Use this:
 # python snmptrapd.py
+
+# unbuffered io for logs and verbose logging? Use this:
 python -u snmptrapd.py -v

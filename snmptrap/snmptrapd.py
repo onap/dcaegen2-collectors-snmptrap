@@ -218,7 +218,7 @@ def log_all_arriving_traps():
 
 def log_published_messages(_post_data_enclosed):
 
-    # FIXME: should keep data dictionary of Fd's open, and reference those vs.
+    # FMDL: should keep data dictionary of Fd's open, and reference those vs.
     #        repeatedly opening append-mode
 
     msg = "adding trap UUID %s to json log" % tds.trap_dict["uuid"]
@@ -295,7 +295,6 @@ def post_dmaap():
                                                        timeout=tds.timeout_seconds)
 
             if http_resp.status_code == requests.codes.ok:
-                # msg = "%d trap(s) : %s successfully published - response from %s: %d %s" % (traps_since_last_publish, trap_uuids_in_buffer, ((c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url']).split('/')[2][:-5]) ,http_resp.status_code, http_resp.text)
                 msg = "%d trap(s) successfully published: %s" % (
                     tds.traps_since_last_publish, tds.trap_uuids_in_buffer)
                 ecomp_logger(tds.LOG_TYPE_METRICS, tds.SEV_INFO,
@@ -338,7 +337,7 @@ def post_dmaap():
             % (tds.trap_uuids_in_buffer, tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'])
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_CRIT, tds.CODE_GENERAL, msg)
 
-    # FIXME: This currently tries, then logs error and trashes buffer if all dmaap attempts fail. Better way?
+    # FMDL: This currently tries, then logs error and trashes buffer if all dmaap attempts fail. Better way?
     tds.traps_since_last_publish = 0
     tds.trap_uuids_in_buffer = ""
     tds.all_traps_str = ""
@@ -353,9 +352,6 @@ def comm_string_rewrite_observer(snmpEngine, execpoint, variables, cbCtx):
 
     # match ALL community strings
     if re.match('.*', str(variables['communityName'])):
-        # msg = "Rewriting communityName '%s' from %s into 'public'"  % (variables['communityName'], ':'.join([str(x) for x in
-        #                                                                variables['transportInformation'][1]]))
-        # ecomp_logger(eelf_debug_fd, eelf_debug_fd, tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         variables['communityName'] = variables['communityName'].clone('public')
 
 # # # # # # # # # # # # # # # # # # #
@@ -428,7 +424,7 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
     tds.trap_dict["community"] = ""
     tds.trap_dict["community len"] = 0
 
-    # FIXME.CHECK_WITH_DOWNSTREAM_CONSUMERS: get rid of round for millisecond val
+    # FMDL.CHECK_WITH_DOWNSTREAM_CONSUMERS: get rid of round for millisecond val
     # epoch_second = int(round(time.time()))
     epoch_msecond = time.time()
     epoch_second = int(round(epoch_msecond))
@@ -465,6 +461,7 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
     tds.trap_dict['trap category'] = (
         tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url']).split('/')[-1]
 
+    return True
 
 # # # # # # # # # # # # # # # # # # #
 # fx: request_observer for community string rewrite
@@ -505,8 +502,6 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
         tds.all_vb_json_str = ', \"varbinds\": ['
         tds.first_varbind = False
     else:
-        # all_vb_json_str = ''.join([all_vb_json_str, ' ,'])
-        # all_vb_json_str = "%s ," % all_vb_json_str
         tds.all_vb_json_str = tds.all_vb_json_str + " ,"
 
     _individual_vb_dict.clear()
@@ -516,8 +511,6 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
 
     _individual_vb_json_str = json.dumps(_individual_vb_dict)
 
-    # all_vb_json_str = "%s%s" % (all_vb_json_str, individual_vb_json_str)
-    # all_vb_json_str = ''.join([all_vb_json_str, individual_vb_json_str])
     tds.all_vb_json_str = tds.all_vb_json_str + _individual_vb_json_str
     return True
 
@@ -548,18 +541,8 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
     msg = "processing varbinds for %s" % (tds.trap_dict["uuid"])
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED, tds.CODE_GENERAL, msg)
 
-    # FIXME update reset location when batching publishes
+    # FMDL update reset location when batching publishes
     vb_idx = 0
-
-    # For reference:
-    #
-    # print('\nvarBinds ==> %s' % (varBinds))
-    #
-    # varBinds ==> [(ObjectName('1.3.6.1.2.1.1.3.0'), TimeTicks(1243175676)),
-    #               (ObjectName('1.3.6.1.6.3.1.1.4.1.0'), ObjectIdentifier('1.3.6.1.4.1.74.2.46.12.1.1')),
-    #               (ObjectName('1.3.6.1.4.1.74.2.46.12.1.1.1'), OctetString(b'ucsnmp heartbeat - ignore')),
-    #               (ObjectName('1.3.6.1.4.1.74.2.46.12.1.1.2'), OctetString(b'Fri Aug 11 17:46:01 EDT 2017'))]
-    #
 
     tds.all_vb_json_str = ""
     vb_idx = 0
@@ -570,29 +553,21 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
         add_varbind_to_json(vb_idx, vb_oid, vb_val.__class__.__name__, vb_val)
         vb_idx += 1
 
-    # FIXME: DL back out first 2 varbinds for v2c notifs prior to publishing varbind count
-    # trap_dict["varbind count"] = vb_idx
     curr_trap_json_str = json.dumps(tds.trap_dict)
     # now have everything except varbinds in "curr_trap_json_str"
 
     # if varbinds present - which will almost always be the case - add all_vb_json_str to trap_json_message
     if vb_idx != 0:
         # close out vb array
-        # all_vb_json_str += "]"
-        # all_vb_json_str = ''.join([all_vb_json_str, ']'])
         tds.all_vb_json_str = tds.all_vb_json_str + ']'
 
         # remove last close bracket from curr_trap_json_str
         curr_trap_json_str = curr_trap_json_str[:-1]
 
         # add vb_json_str to payload
-        # curr_trap_json_str += all_vb_json_str
-        # curr_trap_json_str = ''.join([curr_trap_json_str, all_vb_json_str])
         curr_trap_json_str = curr_trap_json_str + tds.all_vb_json_str
 
         # add last close brace back in
-        # curr_trap_json_str += "}"
-        # curr_trap_json_str = ''.join([curr_trap_json_str, '}'])
         curr_trap_json_str = curr_trap_json_str + '}'
 
     msg = "trap %s : %s" % (tds.trap_dict["uuid"], curr_trap_json_str)
@@ -667,13 +642,6 @@ if __name__ == "__main__":
         prog_name, tds.c_config['snmptrap.title'], tds.c_config['snmptrap.version'])
     stdout_logger(msg)
     
-    # Avoid this unless needed for testing; it prints sensitive data to log
-    #
-    # msg = "Running config: "
-    # stdout_logger(msg)
-    # msg = json.dumps(c_config, sort_keys=False, indent=4)
-    # stdout_logger(msg)
-    
     # open various ecomp logs
     open_eelf_logs()
     
@@ -722,7 +690,7 @@ if __name__ == "__main__":
     # # # # # # # # # # # #
     
     # UDP over IPv4
-    # FIXME:  add check for presense of ipv4_interface prior to attempting add OR just put entire thing in try/except clause
+    # FMDL:  add check for presense of ipv4_interface prior to attempting add OR just put entire thing in try/except clause
     try:
         ipv4_interface = tds.c_config['protocols.ipv4_interface']
         ipv4_port = tds.c_config['protocols.ipv4_port']
@@ -747,16 +715,8 @@ if __name__ == "__main__":
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
     
     
-    # UDP over IPv4, second listening interface/port example if you don't want to listen on all
-    # config.addTransport(
-    #     snmp_engine,
-    #     udp.domainName + (2,),
-    #     udp.UdpTransport().openServerMode(('127.0.0.1', 2162))
-    # )
-    
-    
     # UDP over IPv6
-    # FIXME:  add check for presense of ipv6_interface prior to attempting add OR just put entire thing in try/except clause
+    # FMDL:  add check for presense of ipv6_interface prior to attempting add OR just put entire thing in try/except clause
     try:
         ipv6_interface = tds.c_config['protocols.ipv6_interface']
         ipv6_port = tds.c_config['protocols.ipv6_port']

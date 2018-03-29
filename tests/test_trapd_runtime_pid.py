@@ -1,6 +1,7 @@
 import pytest
 import unittest
 import trapd_runtime_pid
+import trapd_io
  
 class test_save_pid(unittest.TestCase):
     """
@@ -42,6 +43,7 @@ class test_rm_pid(unittest.TestCase):
         """
         result = trapd_runtime_pid.rm_pid('/tmp/snmptrap_test_pid_file_9999')
         self.assertEqual(result, False)
+ 
  
 if __name__ == '__main__':
     unittest.main()
