@@ -1,0 +1,8 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: Dave L <dl3158@att.com>
+Code-Review+2: Vijay Venkatesh Kumar <vv770d@att.com>
+Submitted-by: Vijay Venkatesh Kumar <vv770d@att.com>
+Submitted-at: Tue, 03 Apr 2018 04:27:22 +0000
+Reviewed-on: https://gerrit.onap.org/r/40609
+Project: dcaegen2/collectors/snmptrap
+Branch: refs/heads/master
