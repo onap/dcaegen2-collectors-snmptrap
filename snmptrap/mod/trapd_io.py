@@ -199,7 +199,7 @@ def open_file(_loc_file_name):
     try:
         # open append mode just in case so nothing is lost, but should be
         # non-existent file
-        _loc_fd = open(_loc_file_name, 'a')
+        _loc_fd = open(_loc_file_name, 'a', 1)
         return _loc_fd
     except Exception as e:
         msg = "Error opening " + _loc_file_name + " append mode - " + str(e)
