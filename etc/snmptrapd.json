@@ -38,7 +38,7 @@
                 "aaf_username": null
             }
     },
-"files.runtime_base_dir": "/tmp/opt/app/snmptrap",
+"files.runtime_base_dir": "/opt/app/snmptrap",
 "files.log_dir": "logs",
 "files.data_dir": "data",
 "files.pid_dir": "tmp",
@@ -46,7 +46,7 @@
 "files.snmptrapd_diag": "snmptrapd_prog_diag.log",
 "files.traps_stats_log": "snmptrapd_stats.csv",
 "files.perm_status_file": "snmptrapd_status.log",
-"files.eelf_base_dir": "/tmp/opt/app/snmptrap/logs",
+"files.eelf_base_dir": "/opt/app/snmptrap/logs",
 "files.eelf_error": "error.log",
 "files.eelf_debug": "debug.log",
 "files.eelf_audit": "audit.log",
