@@ -32,4 +32,4 @@ USER ${APPUSER}
 VOLUME ${APPDIR}/logs
 
 # Run run_policy.sh when the container launches
-CMD ["./bin/snmptrapd.sh start"]
+CMD ["./bin/snmptrapd.sh", "start"]
