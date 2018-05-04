@@ -32,7 +32,7 @@ setup(
     install_requires=[
 	"pysnmp==4.4.2",
 	"requests==2.18.3",
-	"onap_dcae_cbs_docker_client==0.0.3"
+	"onap_dcae_cbs_docker_client==1.0.1"
     ],
     author = "Dave L",
     author_email = "dl3158@att.com",
