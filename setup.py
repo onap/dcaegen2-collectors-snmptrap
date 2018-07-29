@@ -31,7 +31,7 @@ setup(
     packages=find_packages(),
     install_requires=[
 	"pysnmp==4.4.2",
-	"requests==2.18.3",
+	"requests==2.19.1",
 	"onap_dcae_cbs_docker_client==1.0.1"
     ],
     author = "Dave L",
