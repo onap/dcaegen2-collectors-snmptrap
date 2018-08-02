@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Jack Lucas <jflucas@research.att.com>
+Submitted-by: Jack Lucas <jflucas@research.att.com>
+Submitted-at: Thu, 02 Aug 2018 16:06:52 +0000
+Reviewed-on: https://gerrit.onap.org/r/58301
+Project: dcaegen2/collectors/snmptrap
+Branch: refs/heads/master
