@@ -21,5 +21,7 @@
 # health. A better possible health check is if the distribution client provided a
 # health check call.
 
-exit 0
-
+# run standard status command, exit with results
+/opt/app/snmptrap/bin/snmptrapd.sh status > /dev/null 2>&1
+ret=$?
+exit ${ret}

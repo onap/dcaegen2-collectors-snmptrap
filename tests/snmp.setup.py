@@ -62,7 +62,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 setup(
     name = "dcaegen2-collectors-snmptrap",
     description = "snmp trap receiver for ONAP docker image",
-    version = "1.3.0",
+    version = "1.4.0",
     packages=find_packages(),
     author = "Dave L",
     author_email = "dl3158@att.com",

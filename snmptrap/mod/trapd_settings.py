@@ -115,7 +115,7 @@ def init():
 
     # <json log of traps published>
     global json_traps_filename
-    json_log_filename = ""
+    json_traps_filename = ""
     global json_traps_fd
     json_fd = None
     # </json log of traps published>
@@ -130,6 +130,17 @@ def init():
     # <runtime PID>
     global pid_file_name
     pid_file_name = ""
+
+    # <stormwatch>
+    global sw_participant_oid_dict
+    sw_participant_oid_dict = {}
+
+    global sw_count_dict
+    sw_count_dict = {}
+
+    global sw_interval_in_seconds
+    sw_interval_in_seconds = 60
+    # </stormwatch >
 
     # <logging types and severities>
     global LOG_TYPES

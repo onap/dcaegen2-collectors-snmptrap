@@ -27,11 +27,11 @@ from setuptools import setup, find_packages
 setup(
     name = "snmptrap",
     description = "snmp trap receiver for ONAP docker image",
-    version = "1.3.0",
+    version = "1.4.0",
     packages=find_packages(),
     install_requires=[
 	"pysnmp==4.4.2",
-	"requests==2.19.1",
+	"requests==2.18.3",
 	"onap_dcae_cbs_docker_client==1.0.1"
     ],
     author = "Dave L",

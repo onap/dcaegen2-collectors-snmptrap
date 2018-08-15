@@ -28,7 +28,7 @@ As traps arrive they are decomposed and transformed into a JSON message which
 is published to a dmaap instance that has been defined by controller.
 
 :Parameters:
-    usage:  snmptrapd.py [-v]
+    usage:  snmptrapd.py
 :Keywords:
     onap dcae snmp trap publish dmaap
 """
@@ -65,14 +65,15 @@ from pysnmp.carrier.asyncio.dgram import udp, udp6
 # from pysnmp.carrier.asyncore.dgram import udp
 from pysnmp.entity.rfc3413 import ntfrcv
 from pysnmp.proto.api import v2c
+from pysnmp import debug
 
 # dcae_snmptrap
 import trapd_settings as tds
 from trapd_runtime_pid import save_pid, rm_pid
 from trapd_get_cbs_config import get_cbs_config
 from trapd_exit import cleanup_and_exit
-from trapd_http_session import init_session_obj
-
+from trapd_http_session import init_session_obj, close_session_obj, reset_session_obj
+from trapd_snmpv3 import init, load_snmpv3_credentials
 from trapd_io import roll_all_logs, open_eelf_logs, roll_file, open_file, close_file, ecomp_logger, stdout_logger
 
 prog_name = os.path.basename(__file__)
@@ -95,7 +96,7 @@ def usage_err():
     """
 
     print('Incorrect usage invoked.  Correct usage:')
-    print('  %s [-v]' % prog_name)
+    print('  %s' % prog_name)
     cleanup_and_exit(1, "undefined")
 
 
@@ -127,36 +128,34 @@ def load_all_configs(_signum, _frame):
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED,
                      tds.CODE_GENERAL, msg)
 
-    # Initialize dmaap requests session object. Close existing session
-    # if applicable.
-    if tds.http_requ_session is not None:
-        tds.http_requ_session.close()
-
-    tds.http_requ_session = init_session_obj()
-    if tds.http_requ_session is None:
-        msg = "Unable to create new http session - FATAL ERROR, exiting"
-        ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
-        stdout_logger(msg)
-        cleanup_and_exit(1, tds.pid_file_name)
-
-    # re-request config from config binding service
-    # (either broker, or json file override)
+    # re-request config (from broker, or local json file 
+    # if broker not present)
     if not get_cbs_config():
-        msg = "error (re)loading CBS config - FATAL ERROR, exiting"
+        msg = "Error (re)loading CBS config - FATAL ERROR, exiting"
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
     else:
-        current_runtime_config_file_name = tds.c_config['files.runtime_base_dir'] + \
+        current_runtime_config_file_name = tds.c_config['files']['runtime_base_dir'] + \
             "/tmp/current_config.json"
-
-        msg = "current config logged to : %s" % current_runtime_config_file_name
+        if int(_signum) != 0:
+            msg = "updated config logged to : %s" % current_runtime_config_file_name
+        else:
+            msg = "current config logged to : %s" % current_runtime_config_file_name
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
         with open(current_runtime_config_file_name, 'w') as outfile:
             json.dump(tds.c_config, outfile)
 
-        # if here, config re-read successfully
-        return True
+    # reset http session based on latest config
+    tds.http_requ_session = reset_session_obj(tds.http_requ_session)
+
+    # FMDL: add with stormWatch
+    # reload sw participating entries, reset counter dictionary
+    # sw.interval_in_seconds, sw.participant_oid_dict = load_sw_participant_dict(tds.c_config['trap_config'])
+    # sw.counter_dict = init_counter_dict()
+
+    # if here, config re-read successfully
+    return True
 
 # # # # # # # # # # # # #
 # fx: log_all_arriving_traps
@@ -166,12 +165,12 @@ def load_all_configs(_signum, _frame):
 def log_all_arriving_traps():
 
     # roll logs as needed/defined in files.roll_frequency
-    if tds.c_config['files.roll_frequency'] == "minute":
+    if tds.c_config['files']['roll_frequency'] == "minute":
         curr_minute = datetime.datetime.now().minute
         if curr_minute != tds.last_minute:
             roll_all_logs()
             tds.last_minute = curr_minute
-    elif tds.c_config['files.roll_frequency'] == "hour":
+    elif tds.c_config['files']['roll_frequency'] == "hour":
         curr_hour = datetime.datetime.now().hour
         if curr_hour != tds.last_hour:
             roll_all_logs()
@@ -183,7 +182,7 @@ def log_all_arriving_traps():
             roll_all_logs()
             tds.last_day = curr_day
 
-    # now log latest arriving trap
+    # always log arriving trap
     try:
         # going for:
         #    1520971776 Tue Mar 13 16:09:36 2018; 1520971776 2018-03-13 16:09:36 DCAE-COLLECTOR-UCSNMP 15209717760049 .1.3.6.1.4.1.2636.4.1.6 gfpmt5pcs10.oss.att.com 135.91.10.139 12.123.1.240 12.123.1.240 2 varbinds: [0] .1.3.6.1.2.1.1.3.0 {10} 1212058366 140 days, 6:49:43.66 [1] .1.3.6.1.6.3.1.1.4.1.0 {6} .1.3.6.1.4.1.2636.4.1.6 [2] .1.3.6.1.4.1.2636.3.1.15.1.1.2.4.0.0 {2} 2 [3] .1.3.6.1.4.1.2636.3.1.15.1.2.2.4.0.0 {2} 4 [4] .1.3.6.1.4.1.2636.3.1.15.1.3.2.4.0.0 {2} 0 [5] .1.3.6.1.4.1.2636.3.1.15.1.4.2.4.0.0 {2} 0 [6] .1.3.6.1.4.1.2636.3.1.15.1.5.2.4.0.0 {4} PEM 3 [7] .1.3.6.1.4.1.2636.3.1.15.1.6.2.4.0.0 {2} 7 [8] .1.3.6.1.4.1.2636.3.1.15.1.7.2.4.0.0 {2} 4 [9] .1.3.6.1.6.3.18.1.3.0 {7} 12.123.1.240
@@ -273,7 +272,7 @@ def post_dmaap():
     k = 0
     dmaap_pub_success = False
 
-    while not dmaap_pub_success and k < (int(tds.c_config['publisher.http_retries'])):
+    while not dmaap_pub_success and k < (int(tds.c_config['publisher']['http_retries'])):
         try:
             if tds.c_config['streams_publishes']['sec_fault_unsecure']['aaf_username'] == "" or tds.c_config['streams_publishes']['sec_fault_unsecure']['aaf_username'] is None:
                 msg = "%d trap(s) : %s - attempt %d (unsecure)" % (
@@ -323,7 +322,7 @@ def post_dmaap():
 
         k += 1
 
-        if k < tds.c_config['publisher.http_retries']:
+        if k < tds.c_config['publisher']['http_retries']:
             msg = "sleeping %.4f seconds and retrying" % (
                 tds.seconds_between_retries)
             ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED,
@@ -380,8 +379,39 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
     :Variables:
     """
 
+    # All sorts of goodies available:
+    # print('Execution point: %s' % execpoint)
+    # print('* transportDomain: %s' % '.'.join([str(x) for x in variables['transportDomain']]))
+    # print('* transportAddress: %s' % '@'.join([str(x) for x in variables['transportAddress']]))
+    # print('* securityModel: %s' % variables['securityModel'])
+    # print('* securityName: %s' % variables['securityName'])
+    # print('* securityLevel: %s' % variables['securityLevel'])
+    # print('* contextEngineId: %s' % variables['contextEngineId'].prettyPrint())
+    # print('* contextName: %s' % variables['contextName'].prettyPrint())
+    # print('* PDU: %s' % variables['pdu'].prettyPrint())
+    # V1 only:
+    # print('* enterprise: %s' % variables['pdu']['enterprise'].prettyPrint())
+    # V1 name (e.g. coldstart, warmstart):
+    # print('* generic: %s' % variables['pdu']['generic-trap'].prettyPrint())
+    # print('* generic: %d' % variables['pdu']['generic-trap'])
+    # print('* specific: %s' % variables['pdu']['specific-trap'].prettyPrint())
+    # print('* specific: %d' % variables['pdu']['specific-trap'])
+
     # init dictionary on new trap
     tds.trap_dict = {}
+
+    # FMDL.CHECK_WITH_DOWNSTREAM_CONSUMERS: get rid of round for millisecond val
+    # epoch_second = int(round(time.time()))
+    epoch_msecond = time.time()
+    epoch_second = int(round(epoch_msecond))
+    if epoch_second == tds.last_epoch_second:
+        tds.traps_in_epoch += 1
+    else:
+        tds.traps_in_epoch = 0
+    tds.last_epoch_second = epoch_second
+    traps_in_epoch_04d = format(tds.traps_in_epoch, '04d')
+    tds.trap_dict['epoch_serno'] = int(
+        (str(epoch_second) + str(traps_in_epoch_04d)))
 
     # assign uuid to trap
     tds.trap_dict["uuid"] = str(uuid_mod.uuid1())
@@ -413,7 +443,7 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
 
         tds.dns_cache_ip_to_name[ip_addr_str] = agent_fqdn
         tds.dns_cache_ip_expires[ip_addr_str] = (
-            time.time() + tds.c_config['cache.dns_cache_ttl_seconds'])
+            time.time() + tds.c_config['cache']['dns_cache_ttl_seconds'])
         msg = "cache for %s (%s) updated - set to expire at %d" % \
             (agent_fqdn, ip_addr_str, tds.dns_cache_ip_expires[ip_addr_str])
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED,
@@ -424,40 +454,35 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
     tds.trap_dict["community"] = ""
     tds.trap_dict["community len"] = 0
 
-    # FMDL.CHECK_WITH_DOWNSTREAM_CONSUMERS: get rid of round for millisecond val
-    # epoch_second = int(round(time.time()))
-    epoch_msecond = time.time()
-    epoch_second = int(round(epoch_msecond))
-    if epoch_second == tds.last_epoch_second:
-        tds.traps_in_epoch += 1
-    else:
-        tds.traps_in_epoch = 0
-    tds.last_epoch_second = epoch_second
-    traps_in_epoch_04d = format(tds.traps_in_epoch, '04d')
-    tds.trap_dict['epoch_serno'] = int(
-        (str(epoch_second) + str(traps_in_epoch_04d)))
-
     snmp_version = variables['securityModel']
     if snmp_version == 1:
         tds.trap_dict["protocol version"] = "v1"
+        enterprise = variables['pdu']['enterprise'].prettyPrint()
+        generic_trap = variables['pdu']['generic-trap']
+        specific_trap = variables['pdu']['specific-trap']
+        if generic_trap < 6:
+            tds.trap_dict["notify OID"] = str(enterprise) + "." + str(specific_trap)
+        else:
+            tds.trap_dict["notify OID"] = str(enterprise) + ".0." + str(specific_trap)
+        tds.trap_dict["notify OID len"] = (tds.trap_dict["notify OID"].count('.') + 1)
+        tds.trap_dict["sysUptime"] = variables['pdu']['time-stamp'].prettyPrint()
     else:
         if snmp_version == 2:
             tds.trap_dict["protocol version"] = "v2c"
         else:
             if snmp_version == 3:
                 tds.trap_dict["protocol version"] = "v3"
+                tds.trap_dict["security level"] = str(variables['securityLevel'])
+                tds.trap_dict["context name"] = str(
+                    variables['contextName'].prettyPrint())
+                tds.trap_dict["security name"] = str(variables['securityName'])
+                tds.trap_dict["security engine"] = str(
+                    variables['contextEngineId'].prettyPrint())
             else:
                 tds.trap_dict["protocol version"] = "unknown"
 
-    if snmp_version == 3:
-        tds.trap_dict["protocol version"] = "v3"
-        tds.trap_dict["security level"] = str(variables['securityLevel'])
-        tds.trap_dict["context name"] = str(
-            variables['contextName'].prettyPrint())
-        tds.trap_dict["security name"] = str(variables['securityName'])
-        tds.trap_dict["security engine"] = str(
-            variables['contextEngineId'].prettyPrint())
-    tds.trap_dict['time received'] = epoch_msecond
+    # tds.trap_dict['time received'] = epoch_msecond
+    tds.trap_dict['time received'] = epoch_second
     tds.trap_dict['trap category'] = (
         tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url']).split('/')[-1]
 
@@ -486,7 +511,7 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
 
     _individual_vb_dict = {}
 
-    if tds.trap_dict["protocol version"] == "v2c":
+    if tds.trap_dict["protocol version"] == "v2c" or tds.trap_dict["protocol version"] == "v3":
         # if v2c and first 2 varbinds, special handling required - e.g. put
         # in trap_dict, not vb_json_str
         if vb_idx == 0:
@@ -537,9 +562,17 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
       callback trap arrival
     :Variables:
     """
-
     msg = "processing varbinds for %s" % (tds.trap_dict["uuid"])
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED, tds.CODE_GENERAL, msg)
+
+    # help(snmp_engine)
+    # print(snmp_engine)
+    # help(varBinds)
+    # print(varBinds)
+    # help(cbCtx)
+    # print(cbCtx)
+    # for key, val in cbCtx:
+    #     print(key, val)
 
     # FMDL update reset location when batching publishes
     vb_idx = 0
@@ -573,6 +606,9 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
     msg = "trap %s : %s" % (tds.trap_dict["uuid"], curr_trap_json_str)
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED, tds.CODE_GENERAL, msg)
 
+    # always log arriving traps
+    log_all_arriving_traps()
+
     # now have a complete json message for this trap in "curr_trap_json_str"
     tds.traps_since_last_publish += 1
     milliseconds_since_last_publish = (time.time() - tds.last_pub_time) * 1000
@@ -588,17 +624,14 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
             ', ' + tds.trap_dict["uuid"]
         tds.all_traps_str = tds.all_traps_str + ', ' + curr_trap_json_str
 
-    # always log arriving traps
-    log_all_arriving_traps()
-
     # publish to dmaap after last varbind is processed
-    if tds.traps_since_last_publish >= tds.c_config['publisher.max_traps_between_publishes']:
+    if tds.traps_since_last_publish >= tds.c_config['publisher']['max_traps_between_publishes']:
         msg = "num traps since last publish (%d) exceeds threshold (%d) - publish traps" % (
-            tds.traps_since_last_publish, tds.c_config['publisher.max_traps_between_publishes'])
+            tds.traps_since_last_publish, tds.c_config['publisher']['max_traps_between_publishes'])
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED,
                      tds.CODE_GENERAL, msg)
         post_dmaap()
-    elif milliseconds_since_last_publish >= tds.c_config['publisher.max_milliseconds_between_publishes']:
+    elif milliseconds_since_last_publish >= tds.c_config['publisher']['max_milliseconds_between_publishes']:
         msg = "num milliseconds since last publish (%.0f) exceeds threshold - publish traps" % milliseconds_since_last_publish
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_DETAILED,
                      tds.CODE_GENERAL, msg)
@@ -633,13 +666,17 @@ if __name__ == "__main__":
     # init vars
     tds.init()
     
+    # FMDL: add with stormWatch
+    # init sw vars
+    # sw.init()
+    
     # Set initial startup hour for rolling logfile
     tds.last_hour = datetime.datetime.now().hour
     
     # get config binding service (CBS) values (either broker, or json file override)
     load_all_configs(0, 0)
     msg = "%s : %s version %s starting" % (
-        prog_name, tds.c_config['snmptrap.title'], tds.c_config['snmptrap.version'])
+        prog_name, tds.c_config['snmptrapd']['title'], tds.c_config['snmptrapd']['version'])
     stdout_logger(msg)
     
     # open various ecomp logs
@@ -650,18 +687,21 @@ if __name__ == "__main__":
         msg = "WARNING:  '-v' argument present.  All diagnostic messages will be logged.  This can slow things down, use only when needed."
         tds.minimum_severity_to_log = 0
         stdout_logger(msg)
+        # use specific flags or 'all' for full debugging
+        help(debug.setLogger)
+        debug.setLogger(debug.Debug('dsp', 'msgproc'))
     
     # name and open arriving trap log
-    tds.arriving_traps_filename = tds.c_config['files.runtime_base_dir'] + "/" + \
-        tds.c_config['files.log_dir'] + "/" + \
-        (tds.c_config['files.arriving_traps_log'])
+    tds.arriving_traps_filename = tds.c_config['files']['runtime_base_dir'] + "/" + \
+        tds.c_config['files']['log_dir'] + "/" + \
+        (tds.c_config['files']['arriving_traps_log'])
     tds.arriving_traps_fd = open_file(tds.arriving_traps_filename)
     msg = ("arriving traps logged to: %s" % tds.arriving_traps_filename)
     stdout_logger(msg)
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
     
     # name and open json trap log
-    tds.json_traps_filename = tds.c_config['files.runtime_base_dir'] + "/" + tds.c_config['files.log_dir'] + "/" + "DMAAP_" + (
+    tds.json_traps_filename = tds.c_config['files']['runtime_base_dir'] + "/" + tds.c_config['files']['log_dir'] + "/" + "DMAAP_" + (
         tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'].split('/')[-1]) + ".json"
     tds.json_traps_fd = open_file(tds.json_traps_filename)
     msg = ("published traps logged to: %s" % tds.json_traps_filename)
@@ -672,8 +712,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGUSR1, load_all_configs)
     
     # save current PID for future/external reference
-    tds.pid_file_name = tds.c_config['files.runtime_base_dir'] + \
-        '/' + tds.c_config['files.pid_dir'] + '/' + prog_name + ".pid"
+    tds.pid_file_name = tds.c_config['files']['runtime_base_dir'] + \
+        '/' + tds.c_config['files']['pid_dir'] + '/' + prog_name + ".pid"
     msg = "Runtime PID file: %s" % tds.pid_file_name
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
     rc = save_pid(tds.pid_file_name)
@@ -681,7 +721,7 @@ if __name__ == "__main__":
     # Get the event loop for this thread
     loop = asyncio.get_event_loop()
     
-    # Create SNMP engine with autogenernated engineID pre-bound
+    # Create SNMP engine with autogenerated engineID pre-bound
     # to socket transport dispatcher
     snmp_engine = engine.SnmpEngine()
     
@@ -690,12 +730,17 @@ if __name__ == "__main__":
     # # # # # # # # # # # #
     
     # UDP over IPv4
-    # FMDL:  add check for presense of ipv4_interface prior to attempting add OR just put entire thing in try/except clause
     try:
-        ipv4_interface = tds.c_config['protocols.ipv4_interface']
-        ipv4_port = tds.c_config['protocols.ipv4_port']
+        ipv4_interface = tds.c_config['protocols']['ipv4_interface']
+        ipv4_port = tds.c_config['protocols']['ipv4_port']
     
         try:
+            # FIXME:  this doesn't appear to throw an exception even if
+            #         the userID is unable (perms) to bind to port
+            #
+            #         We may need to open raw port using other 
+            #         means to confirm proper privileges (then
+            #         close it and reopen w/ pysnmp api)
             config.addTransport(
                 snmp_engine,
                 udp.domainName + (1,),
@@ -716,10 +761,9 @@ if __name__ == "__main__":
     
     
     # UDP over IPv6
-    # FMDL:  add check for presense of ipv6_interface prior to attempting add OR just put entire thing in try/except clause
     try:
-        ipv6_interface = tds.c_config['protocols.ipv6_interface']
-        ipv6_port = tds.c_config['protocols.ipv6_port']
+        ipv6_interface = tds.c_config['protocols']['ipv6_interface']
+        ipv6_port = tds.c_config['protocols']['ipv6_port']
     
         try:
             config.addTransport(
@@ -755,7 +799,12 @@ if __name__ == "__main__":
         comm_string_rewrite_observer,
         'rfc2576.processIncomingMsg:writable'
     )
-    
+
+    # # # # # # # # # # # #
+    # SNMPv3 setup
+    # # # # # # # # # # # #
+    config, snmp_engine=load_snmpv3_credentials(config, snmp_engine, tds.c_config) 
+
     # register snmp_engine_observer_cb for message arrival
     snmp_engine.observer.registerObserver(
         snmp_engine_observer_cb,
