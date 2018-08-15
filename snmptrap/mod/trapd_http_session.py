@@ -53,6 +53,68 @@ def init_session_obj():
     try:
         _loc_session = requests.Session()
     except Exception as e:
-        return None
+        msg = "Unable to create new http session - FATAL ERROR, exiting"
+        ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
+        stdout_logger(msg)
+        cleanup_and_exit(1, tds.pid_file_name)
 
     return _loc_session
+
+
+# # # # # # # # # # # # #
+# fx: close_session_obj
+# # # # # # # # # # # # #
+def close_session_obj(_loc_http_requ_session):
+    """
+    Closes existing http request session object
+    :Parameters:
+      _loc_http_requ_session
+    :Exceptions:
+      session object creation
+        this function will throw an exception if unable to create
+        a new session object
+    :Keywords:
+      http request session
+    :Variables:
+      none
+    """
+
+
+    # Close existing session if present.
+    if _loc_http_requ_session is not None:
+        try:
+            _loc_http_requ_session.close()
+            return True
+        except Exception as e:
+            msg = "Unable to close current http session - FATAL ERROR, exiting"
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
+            stdout_logger(msg)
+            cleanup_and_exit(1, tds.pid_file_name)
+
+
+# # # # # # # # # # # # #
+# fx: reset_session_obj
+# # # # # # # # # # # # #
+def reset_session_obj(_loc_http_requ_session):
+    """
+    Closes existing http request session object
+    and re-opens with current config vals
+    :Parameters:
+      _loc_http_requ_session
+    :Exceptions:
+      session object creation
+        this function will throw an exception if unable to create
+        a new session object
+    :Keywords:
+      http request session
+    :Variables:
+      none
+    """
+
+
+    # close existing http_requ_session if present
+    ret = close_session_obj(_loc_http_requ_session)
+
+    # open new http_requ_session
+    _loc_http_requ_session = init_session_obj()
+    return _loc_http_requ_session
