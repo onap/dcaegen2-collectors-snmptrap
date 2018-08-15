@@ -117,7 +117,7 @@ def open_eelf_logs():
         # open various ecomp logs - if any fails, exit
 
         tds.eelf_error_file_name = (
-            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_error'])
+            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_error'])
         tds.eelf_error_fd = open_file(tds.eelf_error_file_name)
 
     except Exception as e:
@@ -127,7 +127,7 @@ def open_eelf_logs():
 
     try:
         tds.eelf_debug_file_name = (
-            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_debug'])
+            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_debug'])
         tds.eelf_debug_fd = open_file(tds.eelf_debug_file_name)
 
     except Exception as e:
@@ -137,7 +137,7 @@ def open_eelf_logs():
 
     try:
         tds.eelf_audit_file_name = (
-            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_audit'])
+            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_audit'])
         tds.eelf_audit_fd = open_file(tds.eelf_audit_file_name)
     except Exception as e:
         msg = "Error opening eelf audit log : " + str(e)
@@ -146,7 +146,7 @@ def open_eelf_logs():
 
     try:
         tds.eelf_metrics_file_name = (
-            tds.c_config['files.eelf_base_dir'] + "/" + tds.c_config['files.eelf_metrics'])
+            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_metrics'])
         tds.eelf_metrics_fd = open_file(tds.eelf_metrics_file_name)
     except Exception as e:
         msg = "Error opening eelf metric log : " + str(e)
