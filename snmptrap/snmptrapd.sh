@@ -70,11 +70,11 @@ start_service()
    # Hints for startup modifications:
    # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
    # standard startup?  Use this:
-   cmd="python ./snmptrapd.py &"
+   cmd="python ./snmptrapd.py"
    # want tracing?  Use this:
-   #     "python -m trace --trackcalls snmptrapd.py &"
+   #     "python -m trace --trackcalls snmptrapd.py"
    # unbuffered io for logs? Use this:
-   #     "python -u snmptrapd.py &"
+   #     "python -u snmptrapd.py"
 
    cd ${start_dir}
 
