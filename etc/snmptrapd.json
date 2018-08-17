@@ -14,7 +14,7 @@
         "dns_cache_ttl_seconds": 60
     },
     "publisher": {
-        "http_timeout_milliseconds": 1500,
+        "http_milliseconds_timeout": 1500,
         "http_retries": 3,
         "http_milliseconds_between_retries": 750,
         "http_primary_publisher": "true",
@@ -50,7 +50,7 @@
         "eelf_audit": "audit.log",
         "eelf_metrics": "metrics.log",
         "roll_frequency": "day",
-        "minimum_severity_to_log": 2
+        "minimum_severity_to_log": 0
     },
     "trap_config": {
         "sw_interval_in_seconds": 60,

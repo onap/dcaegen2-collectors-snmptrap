@@ -96,13 +96,13 @@ def get_cbs_config():
 
     # recalc timeout, set default if not present
     try:
-        tds.timeout_seconds = tds.c_config['publisher']['http_timeout_milliseconds'] * 1000.0
+        tds.timeout_seconds = tds.c_config['publisher']['http_milliseconds_timeout'] / 1000.0
     except Exception as e:
         tds.timeout_seconds = 1.5
 
     # recalc seconds_between_retries, set default if not present
     try:
-        tds.seconds_between_retries = tds.c_config['publisher']['http_milliseconds_between_retries'] * 1000.0
+        tds.seconds_between_retries = tds.c_config['publisher']['http_milliseconds_between_retries'] / 1000.0
     except Exception as e:
         tds.seconds_between_retries = .750
 
