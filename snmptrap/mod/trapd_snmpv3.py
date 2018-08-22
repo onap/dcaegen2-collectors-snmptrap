@@ -47,20 +47,6 @@ from trapd_io import stdout_logger, ecomp_logger
 
 prog_name = os.path.basename(__file__)
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# module: init
-#         FMDL: should this re-establish listener, with 
-#               blank V3 config attribs?
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-
-def init():
-
-    global v3_config_dict
-    v3_config_dict = {}
-
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # module: load_snmpv3_credentials
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

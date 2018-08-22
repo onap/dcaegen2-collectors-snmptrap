@@ -10,6 +10,9 @@ import trapd_runtime_pid
 import trapd_io
 import trapd_get_cbs_config
 
+from pysnmp.hlapi import *
+from pysnmp import debug
+
 class test_snmptrapd(unittest.TestCase):
     """
     Test the save_pid mod
@@ -122,6 +125,30 @@ class test_snmptrapd(unittest.TestCase):
 
         # open eelf logs
         trapd_io.open_eelf_logs()
+
+    def test_v1_trap_receipt(self):
+        """
+        Test receiving traps
+        """
+
+        # init vars
+        tds.init()
+
+        # request load of CBS data
+        os.environ.update(CBS_SIM_JSON='/tmp/opt/app/snmptrap/etc/snmptrapd.json')
+        trapd_get_cbs_config.get_cbs_config()
+
+        errorIndication, errorStatus, errorIndex, varbinds = next(sendNotification(SnmpEngine(),
+             CommunityData('not_public'),
+             UdpTransportTarget(('localhost', 6162)),
+             ContextData(),
+             'trap',
+             [ObjectType(ObjectIdentity('.1.3.6.1.4.1.999.1'), OctetString('test trap - ignore')),
+              ObjectType(ObjectIdentity('.1.3.6.1.4.1.999.2'), OctetString('ONAP pytest trap'))])
+        )
+
+        result = errorIndication
+        self.assertEqual(result, None)
 
 if __name__ == '__main__':
     unittest.main()

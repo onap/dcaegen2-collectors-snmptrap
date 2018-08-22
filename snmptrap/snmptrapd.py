@@ -73,7 +73,7 @@ from trapd_runtime_pid import save_pid, rm_pid
 from trapd_get_cbs_config import get_cbs_config
 from trapd_exit import cleanup_and_exit
 from trapd_http_session import init_session_obj, close_session_obj, reset_session_obj
-from trapd_snmpv3 import init, load_snmpv3_credentials
+from trapd_snmpv3 import load_snmpv3_credentials
 from trapd_io import roll_all_logs, open_eelf_logs, roll_file, open_file, close_file, ecomp_logger, stdout_logger
 
 prog_name = os.path.basename(__file__)
