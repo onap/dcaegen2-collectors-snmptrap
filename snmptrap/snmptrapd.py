@@ -516,13 +516,14 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
         # in trap_dict, not vb_json_str
         if vb_idx == 0:
             tds.trap_dict["sysUptime"] = str(vb_val.prettyPrint())
-            return True
+            return 0
         else:
             if vb_idx == 1:
                 tds.trap_dict["notify OID"] = str(vb_val.prettyPrint())
                 tds.trap_dict["notify OID len"] = (
                     tds.trap_dict["notify OID"].count('.') + 1)
-                return True
+                return 0
+
     if tds.first_varbind:
         tds.all_vb_json_str = ', \"varbinds\": ['
         tds.first_varbind = False
@@ -537,7 +538,7 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
     _individual_vb_json_str = json.dumps(_individual_vb_dict)
 
     tds.all_vb_json_str = tds.all_vb_json_str + _individual_vb_json_str
-    return True
+    return 1
 
 
 # Callback function for receiving notifications
@@ -575,22 +576,22 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
     #     print(key, val)
 
     # FMDL update reset location when batching publishes
-    vb_idx = 0
-
+    pdu_varbinds = 0
+    payload_varbinds = 0
     tds.all_vb_json_str = ""
-    vb_idx = 0
     tds.first_varbind = True
 
     # iterate over varbinds, add to json struct
     for vb_oid, vb_val in varBinds:
-        add_varbind_to_json(vb_idx, vb_oid, vb_val.__class__.__name__, vb_val)
-        vb_idx += 1
+        varbinds_added = add_varbind_to_json(pdu_varbinds, vb_oid, vb_val.__class__.__name__, vb_val)
+        payload_varbinds += varbinds_added
+        pdu_varbinds += 1
 
     curr_trap_json_str = json.dumps(tds.trap_dict)
     # now have everything except varbinds in "curr_trap_json_str"
 
     # if varbinds present - which will almost always be the case - add all_vb_json_str to trap_json_message
-    if vb_idx != 0:
+    if payload_varbinds != 0:
         # close out vb array
         tds.all_vb_json_str = tds.all_vb_json_str + ']'
 
@@ -688,7 +689,7 @@ if __name__ == "__main__":
         tds.minimum_severity_to_log = 0
         stdout_logger(msg)
         # use specific flags or 'all' for full debugging
-        help(debug.setLogger)
+        # help(debug.setLogger)
         debug.setLogger(debug.Debug('dsp', 'msgproc'))
     
     # name and open arriving trap log

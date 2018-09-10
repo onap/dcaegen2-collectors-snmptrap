@@ -30,7 +30,7 @@
                 "location": "mtl5",
                 "client_id": null,
                 "client_role": null,
-                "topic_url": "http://localhost:3904/events/ONAP-COLLECTOR-SNMPTRAP"
+                "topic_url": "http://localhost:3904/events/GFP-CPE-CEC-MSS-DEV"
             },
             "aaf_username": null
         }
@@ -80,28 +80,22 @@
     "snmpv3_config": {
         "usm_users": [
             {
-                "user": "usr-sha-aes256",
-                "engineId": "8000000001020304",
-                "usmHMACSHAAuth": "authkey1",
-                "usmAesCfb256": "privkey1"
-            },
-            {
                 "user": "user1",
                 "engineId": "8000000000000001",
-                "usmHMACMD5Auth": "authkey1",
-                "usmDESPriv": "privkey1"
+                "usmHMACMD5AuthProtocol": "authkey1",
+                "usmDESPrivProtocol": "privkey1"
             },
             {
                 "user": "user2",
                 "engineId": "8000000000000002",
-                "usmHMACSHAAuth": "authkey2",
-                "usmAesCfb128": "privkey2"
+                "usmHMACSHAAuthProtocol": "authkey2",
+                "usmAesCfb128Protocol": "privkey2"
             },
             {
                 "user": "user3",
                 "engineId": "8000000000000003",
-                "usmHMACSHAAuth": "authkey3",
-                "usmAesCfb256": "privkey3"
+                "usmHMACSHAAuthProtocol": "authkey3",
+                "usmAesCfb256Protocol": "privkey3"
             }
         ]
     }
