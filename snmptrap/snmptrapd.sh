@@ -72,9 +72,11 @@ start_service()
    # standard startup?  Use this:
    cmd="python ./snmptrapd.py"
    # want tracing?  Use this:
-   #     "python -m trace --trackcalls snmptrapd.py"
+   #     cmd="python ./snmptrapd.py -v"
    # unbuffered io for logs? Use this:
-   #     "python -u snmptrapd.py"
+   #     cmd="python -u ./snmptrapd.py"
+   # fmdl: needs further research
+   #     cmd="python -m trace --trackcalls ./snmptrapd.py"
 
    cd ${start_dir}
 
@@ -155,13 +157,13 @@ status_service()
     if [ -r ${pid_file} ]
     then
         pid=$(cat ${pid_file})
-        pgrep -a python | grep ${current_module} | grep "^${pid}" > /dev/null
+        pgrep -f ${current_module}.py | grep "^${pid}" > /dev/null
         return_code=$?
 
         if [ ${return_code} -eq 0 ]
         then
             log_msg "Status: ${current_module} running\n"
-            ps -p ${pid} -f | grep -v PID
+            ps -f -p ${pid} -f | grep -v PID
             return_code=0
         else
             log_msg "Status: ERROR! ${current_module} not running.\n"
