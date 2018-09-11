@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_ccf9584f",
+        "filename": "etc/snmptrapd.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2018-09-11T16:56:04Z",
+      "side": 1,
+      "message": "Topic name for onap should be used (ONAP-COLLECTOR-SNMPTRAP)",
+      "range": {
+        "startLine": 33,
+        "startChar": 59,
+        "endLine": 33,
+        "endChar": 78
+      },
+      "revId": "b52ebad884e4ebea597dd487ca2d0e2a2928e3b1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
