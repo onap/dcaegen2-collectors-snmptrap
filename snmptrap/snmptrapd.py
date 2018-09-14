@@ -74,6 +74,7 @@ from trapd_get_cbs_config import get_cbs_config
 from trapd_exit import cleanup_and_exit
 from trapd_http_session import init_session_obj, close_session_obj, reset_session_obj
 from trapd_snmpv3 import load_snmpv3_credentials
+from trapd_vb_types import pysnmp_to_netsnmp_varbind_convert
 from trapd_io import roll_all_logs, open_eelf_logs, roll_file, open_file, close_file, ecomp_logger, stdout_logger
 
 prog_name = os.path.basename(__file__)
@@ -531,7 +532,7 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
 
     _individual_vb_dict.clear()
     _individual_vb_dict['varbind_oid'] = vb_oid.prettyPrint()
-    _individual_vb_dict['varbind_type'] = vb_type
+    _individual_vb_dict['varbind_type'] = pysnmp_to_netsnmp_varbind_convert(vb_type)
     _individual_vb_dict['varbind_value'] = vb_val.prettyPrint()
 
     _individual_vb_json_str = json.dumps(_individual_vb_dict)
