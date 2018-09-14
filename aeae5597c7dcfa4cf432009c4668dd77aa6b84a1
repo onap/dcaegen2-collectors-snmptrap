@@ -1,0 +1,9 @@
+Code-Review+1: Dan DiFlora <dd8745@att.com>
+Code-Review+2: Tony Hansen <tony@att.com>
+Code-Review+2: Vijay Venkatesh Kumar <vv770d@att.com>
+Verified+1: Vijay Venkatesh Kumar <vv770d@att.com>
+Submitted-by: Vijay Venkatesh Kumar <vv770d@att.com>
+Submitted-at: Fri, 14 Sep 2018 22:48:20 +0000
+Reviewed-on: https://gerrit.onap.org/r/66717
+Project: dcaegen2/collectors/snmptrap
+Branch: refs/heads/master
