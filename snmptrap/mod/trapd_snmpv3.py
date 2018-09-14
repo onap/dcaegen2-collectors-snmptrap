@@ -89,27 +89,40 @@ def load_snmpv3_credentials (_py_config, _snmp_engine, _cbs_config):
 
         # print("Checking auth for %s" % (userName))
 
-        # usmHMACMD5Auth
+        # usmHMACMD5AuthProtocol
         try:
-            authKey=v3_user['usmHMACMD5Auth']
+            authKey=v3_user['usmHMACMD5AuthProtocol']
             authProtocol=config.usmHMACMD5AuthProtocol 
         except Exception as e:
-            # usmHMACSHAAuth
             try:
-                authKey=v3_user['usmHMACSHAAuth']
-                authProtocol=config.usmHMAC192SHA256AuthProtocol
+                authKey=v3_user['usmHMACSHAAuthProtocol']
+                authProtocol=config.usmHMACSHAAuthProtocol
             except Exception as e:
-                # usmNoAuth
                 try:
-                    authKey=v3_user['usmNoAuth']
-                    authProtocol=config.usmNoAuthProtocol
+                    authKey=v3_user['usmHMAC128SHA224AuthProtocol']
+                    authProtocol=config.usmHMAC128SHA224AuthProtocol
                 except Exception as e:
-                    # FMDL:  default to NoAuth, or error/skip entry?
-                    msg = ("No auth specified for user %s ?" % (userName))
-                    authKey=None
-                    authProtocol=config.usmNoAuthProtocol
-                    ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
-                    # break
+                    try:
+                        authKey=v3_user['usmHMAC192SHA256AuthProtocol']
+                        authProtocol=config.usmHMAC192SHA256AuthProtocol
+                    except Exception as e:
+                        try:
+                            authKey=v3_user['usmHMAC256SHA384AuthProtocol']
+                            authProtocol=config.usmHMAC256SHA384AuthProtocol
+                        except Exception as e:
+                            try:
+                                authKey=v3_user['usmHMAC384SHA512AuthProtocol']
+                                authProtocol=config.usmHMAC384SHA512AuthProtocol
+                            except Exception as e:
+                                try:
+                                    authKey=v3_user['usmNoAuthProtocol']
+                                    authProtocol=config.usmNoAuthProtocol
+                                except Exception as e:
+                                    # FMDL:  default to NoAuth, or error/skip entry?
+                                    msg = ("No auth specified for user %s ?" % (userName))
+                                    authKey=None
+                                    authProtocol=config.usmNoAuthProtocol
+                                    ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
         # privacy
         #     find options at -> site-packages/pysnmp/entity/config.py
@@ -119,40 +132,50 @@ def load_snmpv3_credentials (_py_config, _snmp_engine, _cbs_config):
 
         # usm3DESEDEPriv
         try:
-            privKey=v3_user['usm3DESEDEPriv']
+            privKey=v3_user['usm3DESEDEPrivProtocol']
             privProtocol=config.usm3DESEDEPrivProtocol
         except Exception as e:
-            # usmAesCfb128
+            # usmAesCfb128Protocol
             try:
-                privKey=v3_user['usmAesCfb128']
+                privKey=v3_user['usmAesCfb128Protocol']
                 privProtocol=config.usmAesCfb128Protocol
             except Exception as e:
-                # usmAesCfb192
+                # usmAesCfb192Protocol
                 try:
-                    privKey=v3_user['usmAesCfb192']
+                    privKey=v3_user['usmAesCfb192Protocol']
                     privProtocol=config.usmAesCfb192Protocol
                 except Exception as e:
-                    # usmAesCfb256
+                    # usmAesBlumenthalCfb192Protocol
                     try:
-                        privKey=v3_user['usmAesCfb256']
-                        privProtocol=config.usmAesCfb256Protocol
+                        privKey=v3_user['usmAesBlumenthalCfb192Protocol']
+                        privProtocol=config.usmAesBlumenthalCfb192Protocol
                     except Exception as e:
-                        # usmDESPriv
+                        # usmAesCfb256Protocol
                         try:
-                            privKey=v3_user['usmDESPriv']
-                            privProtocol=config.usmDESPrivProtocol
+                            privKey=v3_user['usmAesCfb256Protocol']
+                            privProtocol=config.usmAesCfb256Protocol
                         except Exception as e:
-                            # usmNoPriv
+                            # usmAesBlumenthalCfb256Protocol
                             try:
-                                privKey=v3_user['usmNoPriv']
-                                privProtocol=config.usmNoPrivProtocol
+                                privKey=v3_user['usmAesBlumenthalCfb256Protocol']
+                                privProtocol=config.usmAesBlumenthalCfb256Protocol
                             except Exception as e:
-                                # FMDL:  default to NoPriv, or error/skip entry?
-                                msg = ("No priv specified for user %s" % (userName))
-                                ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
-                                privKey=None
-                                privProtocol=config.usmNoPrivProtocol
-                                # break
+                                # usmDESPrivProtocol
+                                try:
+                                    privKey=v3_user['usmDESPrivProtocol']
+                                    privProtocol=config.usmDESPrivProtocol
+                                except Exception as e:
+                                    # usmNoPrivProtocol
+                                    try:
+                                        privKey=v3_user['usmNoPrivProtocol']
+                                        privProtocol=config.usmNoPrivProtocol
+                                    except Exception as e:
+                                        # FMDL:  default to NoPriv, or error/skip entry?
+                                        msg = ("No priv specified for user %s" % (userName))
+                                        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+                                        privKey=None
+                                        privProtocol=config.usmNoPrivProtocol
+                                        # break
 
         # msg = ("userName: %s authKey: %s authProtocol: %s privKey: %s privProtocol: %s engineId: %s % (userName, authKey, authProtocol, privKey, privProtocol, ctx_engine_id))
         msg = ("userName: %s authKey: **** authProtocol: %s privKey: **** privProtocol: %s engineId: ****" % (userName, authProtocol, privProtocol))
