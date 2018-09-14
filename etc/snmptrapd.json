@@ -30,7 +30,7 @@
                 "location": "mtl5",
                 "client_id": null,
                 "client_role": null,
-                "topic_url": "http://localhost:3904/events/GFP-CPE-CEC-MSS-DEV"
+                "topic_url": "http://localhost:3904/events/ONAP-COLLECTOR-SNMPTRAP"
             },
             "aaf_username": null
         }
