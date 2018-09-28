@@ -188,7 +188,7 @@ def log_all_arriving_traps():
         # going for:
         #    1520971776 Tue Mar 13 16:09:36 2018; 1520971776 2018-03-13 16:09:36 DCAE-COLLECTOR-UCSNMP 15209717760049 .1.3.6.1.4.1.2636.4.1.6 gfpmt5pcs10.oss.att.com 135.91.10.139 12.123.1.240 12.123.1.240 2 varbinds: [0] .1.3.6.1.2.1.1.3.0 {10} 1212058366 140 days, 6:49:43.66 [1] .1.3.6.1.6.3.1.1.4.1.0 {6} .1.3.6.1.4.1.2636.4.1.6 [2] .1.3.6.1.4.1.2636.3.1.15.1.1.2.4.0.0 {2} 2 [3] .1.3.6.1.4.1.2636.3.1.15.1.2.2.4.0.0 {2} 4 [4] .1.3.6.1.4.1.2636.3.1.15.1.3.2.4.0.0 {2} 0 [5] .1.3.6.1.4.1.2636.3.1.15.1.4.2.4.0.0 {2} 0 [6] .1.3.6.1.4.1.2636.3.1.15.1.5.2.4.0.0 {4} PEM 3 [7] .1.3.6.1.4.1.2636.3.1.15.1.6.2.4.0.0 {2} 7 [8] .1.3.6.1.4.1.2636.3.1.15.1.7.2.4.0.0 {2} 4 [9] .1.3.6.1.6.3.18.1.3.0 {7} 12.123.1.240
 
-        tds.arriving_traps_fd.write('%s %s; %s %s %s %s %s %s %s %s %s %s %s\n' %
+        tds.arriving_traps_fd.write('%s %s; %s %s %s %s %s %s %s %s %s %s\n' %
                                     (tds.trap_dict["time received"],
                                      time.strftime(
                                          "%a %b %d %H:%M:%S %Y", time.localtime(time.time())),
@@ -201,7 +201,6 @@ def log_all_arriving_traps():
                                         tds.trap_dict["agent address"],
                                         tds.trap_dict["cambria.partition"],
                                         tds.trap_dict["protocol version"],
-                                        tds.trap_dict["sysUptime"],
                                         tds.trap_dict["uuid"],
                                         tds.all_vb_json_str))
 
@@ -458,27 +457,27 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
     snmp_version = variables['securityModel']
     if snmp_version == 1:
         tds.trap_dict["protocol version"] = "v1"
-        enterprise = variables['pdu']['enterprise'].prettyPrint()
-        generic_trap = variables['pdu']['generic-trap']
-        specific_trap = variables['pdu']['specific-trap']
-        if generic_trap < 6:
-            tds.trap_dict["notify OID"] = str(enterprise) + "." + str(specific_trap)
-        else:
-            tds.trap_dict["notify OID"] = str(enterprise) + ".0." + str(specific_trap)
-        tds.trap_dict["notify OID len"] = (tds.trap_dict["notify OID"].count('.') + 1)
-        tds.trap_dict["sysUptime"] = variables['pdu']['time-stamp'].prettyPrint()
+        # enterprise = variables['pdu']['enterprise'].prettyPrint()
+        # generic_trap = variables['pdu']['generic-trap']
+        # specific_trap = variables['pdu']['specific-trap']
+        # if generic_trap < 6:
+        #     tds.trap_dict["notify OID"] = "." + str(enterprise) + "." + str(specific_trap)
+        # else:
+        #     tds.trap_dict["notify OID"] = "." + str(enterprise) + ".0." + str(specific_trap)
+        # tds.trap_dict["notify OID len"] = tds.trap_dict["notify OID"].count('.')
+        # tds.trap_dict["sysUptime"] = variables['pdu']['time-stamp'].prettyPrint()
     else:
         if snmp_version == 2:
             tds.trap_dict["protocol version"] = "v2c"
         else:
             if snmp_version == 3:
                 tds.trap_dict["protocol version"] = "v3"
-                tds.trap_dict["security level"] = str(variables['securityLevel'])
-                tds.trap_dict["context name"] = str(
-                    variables['contextName'].prettyPrint())
-                tds.trap_dict["security name"] = str(variables['securityName'])
-                tds.trap_dict["security engine"] = str(
-                    variables['contextEngineId'].prettyPrint())
+                # tds.trap_dict["security level"] = str(variables['securityLevel'])
+                # tds.trap_dict["context name"] = str(
+                #     variables['contextName'].prettyPrint())
+                # tds.trap_dict["security name"] = str(variables['securityName'])
+                # tds.trap_dict["security engine"] = str(
+                #     variables['contextEngineId'].prettyPrint())
             else:
                 tds.trap_dict["protocol version"] = "unknown"
 
@@ -512,18 +511,25 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
 
     _individual_vb_dict = {}
 
-    if tds.trap_dict["protocol version"] == "v2c" or tds.trap_dict["protocol version"] == "v3":
-        # if v2c and first 2 varbinds, special handling required - e.g. put
-        # in trap_dict, not vb_json_str
-        if vb_idx == 0:
-            tds.trap_dict["sysUptime"] = str(vb_val.prettyPrint())
-            return True
-        else:
-            if vb_idx == 1:
-                tds.trap_dict["notify OID"] = str(vb_val.prettyPrint())
-                tds.trap_dict["notify OID len"] = (
-                    tds.trap_dict["notify OID"].count('.') + 1)
-                return True
+    # if first varbind (sysUptime), always return immediately as
+    # we don't publish sysUptime
+    if vb_idx == 0:
+        return 0
+
+    # if second varbind, use as notifyOID for all snmp versions
+    if vb_idx == 1:
+        tds.trap_dict["notify OID"] = "." + str(vb_val.prettyPrint())
+        tds.trap_dict["notify OID len"] = tds.trap_dict["notify OID"].count('.')
+        return 0
+
+    # for SNMPv1 traps, skip varbinds 2, 3 and 4:
+    #    - .1.3.6.1.6.3.18.1.3.0 agent override
+    #    - .1.3.6.1.6.3.18.1.4.0 community string
+    #    - .1.3.6.1.6.3.1.1.4.3.0 V1 enterprise in original trap
+    if tds.trap_dict["protocol version"] == "v1":
+        if vb_idx < 5:
+            return 0
+        
     if tds.first_varbind:
         tds.all_vb_json_str = ', \"varbinds\": ['
         tds.first_varbind = False
@@ -531,14 +537,14 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
         tds.all_vb_json_str = tds.all_vb_json_str + " ,"
 
     _individual_vb_dict.clear()
-    _individual_vb_dict['varbind_oid'] = vb_oid.prettyPrint()
+    _individual_vb_dict['varbind_oid'] = "." + vb_oid.prettyPrint()
     _individual_vb_dict['varbind_type'] = pysnmp_to_netsnmp_varbind_convert(vb_type)
     _individual_vb_dict['varbind_value'] = vb_val.prettyPrint()
 
     _individual_vb_json_str = json.dumps(_individual_vb_dict)
 
     tds.all_vb_json_str = tds.all_vb_json_str + _individual_vb_json_str
-    return True
+    return 1
 
 
 # Callback function for receiving notifications
@@ -576,22 +582,22 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
     #     print(key, val)
 
     # FMDL update reset location when batching publishes
-    vb_idx = 0
-
+    pdu_varbinds = 0
+    payload_varbinds = 0
     tds.all_vb_json_str = ""
-    vb_idx = 0
     tds.first_varbind = True
 
     # iterate over varbinds, add to json struct
     for vb_oid, vb_val in varBinds:
-        add_varbind_to_json(vb_idx, vb_oid, vb_val.__class__.__name__, vb_val)
-        vb_idx += 1
+        varbinds_added = add_varbind_to_json(pdu_varbinds, vb_oid, vb_val.__class__.__name__, vb_val)
+        payload_varbinds += varbinds_added
+        pdu_varbinds += 1
 
     curr_trap_json_str = json.dumps(tds.trap_dict)
     # now have everything except varbinds in "curr_trap_json_str"
 
     # if varbinds present - which will almost always be the case - add all_vb_json_str to trap_json_message
-    if vb_idx != 0:
+    if payload_varbinds != 0:
         # close out vb array
         tds.all_vb_json_str = tds.all_vb_json_str + ']'
 
@@ -689,8 +695,9 @@ if __name__ == "__main__":
         tds.minimum_severity_to_log = 0
         stdout_logger(msg)
         # use specific flags or 'all' for full debugging
-        help(debug.setLogger)
-        debug.setLogger(debug.Debug('dsp', 'msgproc'))
+        # debug.setLogger(debug.Debug('dsp', 'msgproc'))
+        debug.setLogger(debug.Debug('all'))
+
     
     # name and open arriving trap log
     tds.arriving_traps_filename = tds.c_config['files']['runtime_base_dir'] + "/" + \
