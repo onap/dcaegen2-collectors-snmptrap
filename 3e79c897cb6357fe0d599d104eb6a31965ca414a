@@ -1,0 +1,8 @@
+Code-Review+1: Dan DiFlora <dd8745@att.com>
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Vijay Venkatesh Kumar <vv770d@att.com>
+Submitted-by: Vijay Venkatesh Kumar <vv770d@att.com>
+Submitted-at: Fri, 28 Sep 2018 21:26:25 +0000
+Reviewed-on: https://gerrit.onap.org/r/69531
+Project: dcaegen2/collectors/snmptrap
+Branch: refs/heads/master
