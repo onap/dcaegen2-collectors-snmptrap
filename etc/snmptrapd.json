@@ -50,7 +50,7 @@
         "eelf_audit": "audit.log",
         "eelf_metrics": "metrics.log",
         "roll_frequency": "day",
-        "minimum_severity_to_log": 0
+        "minimum_severity_to_log": 3
     },
     "snmpv3_config": {
         "usm_users": [
