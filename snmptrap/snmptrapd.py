@@ -176,12 +176,12 @@ def log_all_arriving_traps():
         if curr_hour != tds.last_hour:
             roll_all_logs()
             tds.last_hour = curr_hour
-        else:
-            # otherwise, assume daily roll
-            curr_day = datetime.datetime.now().day
-            if curr_day != tds.last_day:
-                roll_all_logs()
-                tds.last_day = curr_day
+    else:
+        # otherwise, assume daily roll
+        curr_day = datetime.datetime.now().day
+        if curr_day != tds.last_day:
+            roll_all_logs()
+            tds.last_day = curr_day
 
     # always log arriving trap
     try:
