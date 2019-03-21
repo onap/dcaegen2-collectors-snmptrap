@@ -150,5 +150,29 @@ class test_snmptrapd(unittest.TestCase):
         result = errorIndication
         self.assertEqual(result, None)
 
+    def test_add_varbind_to_json(self):
+
+        # init vars
+        tds.init()
+        tds.trap_dict["notify OID"] = ".1.2.3.4.5.6.7.8"
+        tds.trap_dict["protocol version"] = "v2c"
+
+        # varbinds=[(ObjectName('1.3.6.1.2.1.1.3.0'), TimeTicks(0)), (ObjectName('1.3.6.1.6.3.1.1.4.1.0'), ObjectIdentifier('1.3.6.1.4.1.74.2.46.12.1.1')), (ObjectName('1.3.6.1.4.1.74.2.46.12.1.1.1'), OctetString(b'ucsnmp heartbeat - ignore')), (ObjectName('1.3.6.1.4.1.74.2.46.12.1.1.2'), OctetString(b'Thu Mar 21 15:46:58 2019'))]
+
+        # vb=(ObjectName('1.3.6.1.4.1.74.2.46.12.1.1.1'), OctetString(b'ucsnmp heartbeat - ignore'))
+
+        self.assertEqual(snmptrapd.add_varbind_to_json(0,ObjectIdentifier('.1.2.3.4'), 'OctetString', OctetString(b'Thu Mar 21 15:46:58 2019')), 0)
+        self.assertEqual(snmptrapd.add_varbind_to_json(1,ObjectIdentifier('.1.2.3.4'), 'OctetString', OctetString(b'Thu Mar 21 15:46:58 2019')), 0)
+        self.assertEqual(snmptrapd.add_varbind_to_json(2,ObjectIdentifier('.1.2.3.4'), 'OctetString', OctetString(b'Thu Mar 21 15:46:58 2019')), 1)
+        self.assertEqual(snmptrapd.add_varbind_to_json(3,ObjectIdentifier('.1.2.3.4'), 'OctetString', OctetString(b'Thu Mar 21 15:46:58 2019')), 1)
+
+        # init vars
+        tds.init()
+        tds.trap_dict["notify OID"] = ".1.2.3.4.5.6.7.8"
+        tds.trap_dict["protocol version"] = "v1"
+
+        self.assertEqual(snmptrapd.add_varbind_to_json(0,ObjectIdentifier('.1.2.3.4'), 'OctetString', OctetString(b'Thu Mar 21 15:46:58 2019')), 0)
+        self.assertEqual(snmptrapd.add_varbind_to_json(5,ObjectIdentifier('.1.2.3.4'), 'OctetString', OctetString(b'Thu Mar 21 15:46:58 2019')), 1)
+
 if __name__ == '__main__':
     unittest.main()
