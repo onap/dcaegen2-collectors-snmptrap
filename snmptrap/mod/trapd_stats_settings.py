@@ -1,4 +1,3 @@
-#!/bin/bash
 # ============LICENSE_START=======================================================
 # Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
@@ -14,14 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============LICENSE_END=========================================================
+"""
+"""
 
-# Health check script for service change handler
+__docformat__ = 'restructuredtext'
 
-# Currently, the simple existence of the running container is assumed to indicate
-# health. A better possible health check is if the distribution client provided a
-# health check call.
 
-# run standard status command, exit with results
-/opt/app/snmptrap/bin/snmptrapd.sh status > /dev/null 2>&1
-ret=$?
-exit ${ret}
+def init():
+
+    # <stats>
+    #
+    #     oid_counter_dict
+    #        key [<notify oid>] -> count
+    #
+    #     agent_counter_dict
+    #        key [<agent>] -> count
+    #
+    global oid_counter_dict
+    oid_counter_dict = {}
+
+    global agent_counter_dict
+    agent_counter_dict = {}
+
+    global total_notifications
+    total_notifications = 0
+
+    global metric_log_notification_threshold_pct
+    metric_log_notification_threshold_pct = 25
+
+    # </stats>

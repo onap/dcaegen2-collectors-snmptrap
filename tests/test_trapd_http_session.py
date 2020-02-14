@@ -7,6 +7,14 @@ class test_init_session_obj(unittest.TestCase):
     Test the init_session_obj mod
     """
  
+    def close_nonexisting_session(self):
+        """
+        test close of existing http session
+        """
+        sess="no session"
+        result = trapd_http_session.close_session_obj(sess)
+        self.assertEqual(result, True)
+ 
     def init_session(self):
         """
         test creation of http session
@@ -30,13 +38,6 @@ class test_init_session_obj(unittest.TestCase):
         """
         sess = trapd_http_session.init_session_obj()
         result = trapd_http_session.close_session_obj(sess)
-        self.assertEqual(result, True)
- 
-    def close_nonexistent_session(self):
-        """
-        test close of non-existent http session
-        """
-        result = trapd_http_session.close_session_obj(None)
         self.assertEqual(result, True)
  
 if __name__ == '__main__':

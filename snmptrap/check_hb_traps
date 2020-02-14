@@ -1,0 +1,669 @@
+#!/bin/bash
+# ============LICENSE_START=======================================================
+# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
+# ================================================================================
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============LICENSE_END=========================================================
+#
+#    check_hb_traps - Ensure traps are being received and published in trapd
+#
+#        Author:        Dan DiFlora, AT&T
+#        Initial Rev:   Dec, 2016
+#
+#        June, 2017: For Open DCAE, original release was checking only
+#                    heartbeats and heartbeat publishes. In this release we
+#                    add check for traps and publishes but stop checking
+#                    heartbeat publishes. Check for publishes is modified to
+#                    include any publish (trap or a heartbeat) when running
+#                    in Open DCAE environment.
+#
+#                    For optimization purposes, removed some external commands
+#                    (grep/awk/etc) in favor of built-ins (e.g., arrays).
+#
+#                    Added support for .gz files since both trap and json log
+#                    archives are gzipped now.
+
+# Variables
+
+prog_name=`basename $0`
+open_dcae_dmaap="True"
+
+# Functions
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# log_it()
+# 
+#    Just a simple logging function.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+log_it()
+    {
+    # FATAL messages  --> error_log
+    # NORMAL messages --> debug_log
+
+    calling_fx=${1}
+    severity=${2}
+    shift 2
+
+    if [ ${severity} == FATAL ]
+    then
+        echo "`date -u "+%Y-%m-%dT%H:%M:%S+00:00"`||${calling_fx}|check_hb_traps||||${severity}|100|| $@" >> ${error_log}
+    else
+        echo "`date -u "+%Y-%m-%dT%H:%M:%S+00:00"`||${calling_fx}|check_hb_traps||||${severity}|100|| $@" >> ${debug_log}
+    fi
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# check_trapd_env()
+# 
+#    trapd runtime variables (from tmp/current_config.json) are
+#    required for this program to run.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+check_trapd_env()
+    {
+    if [ ! -s "${PWD}/tmp/current_config.json" ]
+    then
+        >&2 echo "${prog_name}: ${PWD}/tmp/current_config.json does not" \
+                 "exist or is empty - exiting."
+        exit 2
+    else
+        trapd_runtime_config=${PWD}/tmp/current_config.json
+    fi
+
+    # Note: these jq invocations return "null" if key does not exist but
+    # we'll also check for empty string in case json value is "".
+
+    trapd_base_dir=`jq -r .files.runtime_base_dir ${trapd_runtime_config} \
+                                                  2>/dev/null`
+    trapd_logs_dir_val=`jq -r .files.log_dir ${trapd_runtime_config} \
+                                             2>/dev/null`
+    trapd_arriving_traps_fname=`jq -r .files.arriving_traps_log \
+                                      ${trapd_runtime_config} \
+                                      2>/dev/null`
+    trapd_eelf_error_fname=`jq -r .files.eelf_error \
+                                      ${trapd_runtime_config} \
+                                      2>/dev/null`
+    trapd_eelf_debug_fname=`jq -r .files.eelf_debug \
+                                      ${trapd_runtime_config} \
+                                      2>/dev/null`
+    trap_thr=`jq -r .check_hb_traps.trap_thr ${trapd_runtime_config} \
+                                             2>/dev/null`
+    hb_thr=`jq -r .check_hb_traps.hb_thr ${trapd_runtime_config} \
+                                         2>/dev/null`
+    hb_notify_oid=`jq -r .check_hb_traps.hb_notify_oid \
+                         ${trapd_runtime_config} \
+                         2>/dev/null`
+    hb_topic_val=`jq -r \
+                  .streams_publishes.sec_fault_unsecure.dmaap_info.topic_url \
+                  ${trapd_runtime_config} 2>/dev/null`
+
+    for value in "${trapd_base_dir}" "${trapd_logs_dir_val}" \
+                 "${trapd_arriving_traps_fname}" "${trapd_eelf_error_fname}" \
+                 "${trapd_eelf_debug_fname}" "${trap_thr}" "${hb_thr}" \
+                 "${hb_notify_oid}" "${hb_topic_val}"
+    do
+        if [ "${value}" = "null" ] || [ -z "${value}" ]
+        then
+            >&2 echo -e "${prog_name}: Missing or empty config objects in" \
+                     "${PWD}/tmp/current_config.json." \
+                     "\n                Required objects include: trap_thr," \
+                     "hb_thr, hb_notify_oid." \
+                     "\n\n                Exiting."
+            exit 2
+        fi
+    done
+
+    # Build required variables from returned json objects
+    trapd_logs_dir=${trapd_base_dir}/${trapd_logs_dir_val}
+    error_log=${trapd_logs_dir}/${trapd_eelf_error_fname}
+    debug_log=${trapd_logs_dir}/${trapd_eelf_debug_fname}
+
+    hb_topic=`echo ${hb_topic_val} |  cut -d\/ -f5`
+
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# check_file_gz()
+# 
+#    Self-explanatory.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+check_file_gz()
+    {
+    file_to_check=$1
+
+    # Numerous ways to do this but we assume compressed files end with .gz
+    if [[ ${file_to_check} =~ \.gz$ ]]
+    then
+        # Yes, file is .gz.
+        return 0
+    else
+        return 1
+    fi
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# check_file_empty()
+# 
+#    Self-explanatory.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+check_file_empty()
+    {
+    file_to_check=$1
+
+    # File emtpy check is different for .gz vs regular file, so need to check
+    # that first.
+    if check_file_gz ${file_to_check}
+    then
+        # .gz file here - now see if empty.
+        compressed_size=`gzip -l ${file_to_check} | awk 'NR==2 {print $2}'`
+        if [ ${compressed_size} -eq 0 ]
+        then
+            # yes, file is empty.
+            return 0
+        else
+            return 1
+        fi
+    else
+        # regular file here - now see if empty.
+        if [ ! -s ${file_to_check} ]
+        then
+            # yes, file is empty.
+            return 0
+        else
+            return 1
+        fi
+    fi
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# verify_trap_logs()
+# 
+#    Non-zero byte trap logs required. Also get info about last and
+#    second-to-last trap log file(s).
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+verify_trap_logs()
+    {
+    calling_fx=${FUNCNAME[0]}
+
+    # Note: initializing these vars to empty is just for readability.
+    trap_log_list=""
+    trap_log_list_nz=""
+    sec_log_to_check=""
+
+    # Shorter variables w/o full path.
+    cd ${trapd_logs_dir} 2>/dev/null
+
+    trap_log_list=`ls -tr *${trapd_arriving_traps_fname}* 2>/dev/null`
+
+    # Exit if there are no trap log files.
+    if [ -z "${trap_log_list}" ]
+    then
+        # FATAL
+        read -d '' msg <<EOF
+            No files named *${trapd_arriving_traps_fname}* in
+            ${trapd_logs_dir} or ${trapd_logs_dir} does not exist - exiting.
+EOF
+        log_it ${calling_fx} FATAL ${msg}
+        exit 2
+    fi
+
+    trap_log_list_arr=( ${trap_log_list} )
+    num_trapd_logs=${#trap_log_list_arr[@]}
+
+    # Do we have any non-zero byte (nz) files?
+    for f in ${trap_log_list}
+    do
+        if ! check_file_empty ${f}
+        then
+            trap_log_list_nz="${trap_log_list_nz} ${f}"
+        fi
+    done
+
+    # Exit if all trap log files are zero bytes.
+    # Note: EOFs must not be quoted and last EOF must be at beginning of line.
+    if [ -z "${trap_log_list_nz}" ]
+    then
+        # FATAL
+        read -d '' msg <<EOF
+            All trap logs in ${trapd_logs_dir} are empty -
+            exiting.
+EOF
+        log_it ${calling_fx} FATAL ${msg}
+        exit 2
+    fi
+
+    # We have at least one nz trapd log, need to know how many nz logs we have.
+    trap_log_list_nz_arr=( ${trap_log_list_nz} )
+    num_trap_logs_nz=${#trap_log_list_nz_arr[@]}
+
+    # Need a handle on last nz trap log. Set and pass "awk variable" to allow
+    # awk printing of last nz file.
+    last_trap_log_nz=${trap_log_list_nz_arr[${num_trap_logs_nz}-1]}
+    last_trap_log_nz_stat=`stat -c %y ${last_trap_log_nz} | cut -d\. -f1`
+
+    # To deal w/files rolling on relatively inactive systems, will also need
+    # handle on second-to-last nz trapd log (if one exists). 
+    if [ ${num_trap_logs_nz} -gt 1 ]
+    then
+        sec_log_to_check="yes"
+        sec_trap_log_nz=${trap_log_list_nz_arr[${num_trap_logs_nz}-2]}
+        sec_trap_log_nz_stat=`stat -c %y ${sec_trap_log_nz} | cut -d\. -f1`
+    fi
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# check_traps()
+# 
+#    Get last trap time and compare to threshold: trap_thr_time.
+#    Post fatal or normal msg based on that comparison.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+check_traps()
+    {
+    calling_fx=${FUNCNAME[0]}
+
+    last_trap_time=""
+    last_trap_time_sec_log=""
+
+    # We need to search (grep) through trap logs. Different grep command
+    # required for regular vs .gz file.
+    if check_file_gz ${last_trap_log_nz}
+    then
+        grep_cmd=zgrep
+    else
+        grep_cmd=grep
+    fi
+
+    last_trap_time=`${grep_cmd} ${hb_topic} ${last_trap_log_nz} | \
+                  grep -v " ${hb_notify_oid} " | tail -1 |awk '{print $1}'`
+
+    # Do we have a second non-empty trap log file to check?
+    if [ ! -z ${sec_log_to_check} ]
+    then
+
+        # Again, different grep required for regular vs .gz file.
+        if check_file_gz ${sec_trap_log_nz}
+        then
+            grep_cmd=zgrep
+        else
+            grep_cmd=grep
+        fi
+
+        last_trap_time_sec_log=`${grep_cmd} ${hb_topic} ${sec_trap_log_nz} | \
+                               grep -v " ${hb_notify_oid} " | tail -1 | \
+                               awk '{print $1}'`
+
+        if [ -z ${last_trap_time} ] && [ -z ${last_trap_time_sec_log} ]
+        then
+            # FATAL
+
+            # Both vars are empty so no traps in either of last two logs.
+            read -d '' msg <<EOF
+                No traps found in trap log files: 
+                ${trapd_logs_dir}/${last_trap_log_nz} (dated 
+                ${last_trap_log_nz_stat}) and
+                ${trapd_logs_dir}/${sec_trap_log_nz} (dated
+                ${sec_trap_log_nz_stat})
+EOF
+            log_it ${calling_fx} FATAL ${msg}
+            return
+        elif [ ! -z ${last_trap_time} ] && [ ! -z ${last_trap_time_sec_log} ]
+        then
+            # Both logs have traps, get time of very last trap.
+            if (( ${last_trap_time} >= ${last_trap_time_sec_log} ))
+            then
+                # Last trap is in last/newest trap log.
+                last_trap_time_to_use=${last_trap_time}
+            else
+                # Last trap is in second trap log (should never happen).
+                last_trap_time_to_use=${last_trap_time_sec_log}
+            fi
+        elif [ ! -z ${last_trap_time} ] && [ -z ${last_trap_time_sec_log} ]
+        then
+            # We have a trap in last trap log but not in second trap log.
+            last_trap_time_to_use=${last_trap_time}
+        else
+            # We have a trap in second trap log but not in last trap log.
+            last_trap_time_to_use=${last_trap_time_sec_log}
+        fi
+
+    else
+        # No second trap log, just use time of last trap in last log if a
+        # NON-hb_notify_oid trap exists.
+        if [ -z ${last_trap_time} ]
+        then
+            # FATAL
+            read -d '' msg <<EOF
+                No traps found in trap log file:
+                ${trapd_logs_dir}/${last_trap_log_nz} (dated
+                ${last_trap_log_nz_stat})
+EOF
+            log_it ${calling_fx} FATAL ${msg}
+            return
+        fi
+        last_trap_time_to_use=${last_trap_time}
+    fi
+
+    time_now=`date +%s`
+    trap_thr_time=$(( time_now - trap_thr ))
+    last_trap_time_diff=$(( time_now - last_trap_time_to_use ))
+    last_trap_time_fmt=`date -d @${last_trap_time_to_use}`
+
+    # Post FATAL if last trap time crosses threshold, otherwise
+    # post NORMAL.
+    if (( ${last_trap_time_to_use} <= ${trap_thr_time} ))
+    then
+        # FATAL
+        read -d '' msg <<EOF
+            Last trap arrived ${last_trap_time_diff} seconds ago at
+            ${last_trap_time_to_use}, ${last_trap_time_fmt}
+EOF
+        log_it ${calling_fx} FATAL ${msg}
+    else
+        # NORMAL
+        read -d '' msg <<EOF
+            Last trap arrived ${last_trap_time_diff} seconds ago at
+            ${last_trap_time_to_use}, ${last_trap_time_fmt}
+EOF
+        log_it ${calling_fx} NORMAL ${msg}
+    fi
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# check_hb()
+# 
+#    Get last hb time and compare to threshold: hb_thr_time.
+#    Post fatal or normal msg based on that comparison.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+check_hb()
+    {
+    calling_fx=${FUNCNAME[0]}
+
+    last_hb_time=""
+
+    # Different grep required for regular vs .gz file.
+    if check_file_gz ${last_trap_log_nz}
+    then
+        grep_cmd=zgrep
+    else
+        grep_cmd=grep
+    fi
+
+    last_hb_time=`${grep_cmd} ${hb_topic} ${last_trap_log_nz} | \
+                    grep " ${hb_notify_oid} " | tail -1 |awk '{print $1}'`
+
+    if [ -z ${last_hb_time} ]
+    then
+        # FATAL
+        # No heartbeats in last trap log.
+        read -d '' msg <<EOF
+            No heartbeats found in trap log file:
+            ${trapd_logs_dir}/${last_trap_log_nz} (dated 
+            ${last_trap_log_nz_stat})
+EOF
+        log_it ${calling_fx} FATAL ${msg}
+    else
+        time_now=`date +%s`
+        hb_thr_time=$(( time_now - hb_thr ))
+        last_hb_time_diff=$(( time_now - last_hb_time ))
+        last_hb_time_fmt=`date -d @${last_hb_time}`
+
+        # Post FATAL if last trap time crosses threshold, otherwise
+        # post NORMAL.
+        if (( ${last_hb_time} <= ${hb_thr_time} ))
+        then
+            # FATAL
+            read -d '' msg <<EOF
+                Last heartbeat arrived ${last_hb_time_diff} seconds
+                ago at ${last_hb_time}, ${last_hb_time_fmt}
+EOF
+            log_it ${calling_fx} FATAL ${msg}
+        else
+            # NORMAL
+            read -d '' msg <<EOF
+                Last heartbeat arrived ${last_hb_time_diff} seconds
+                ago at ${last_hb_time}, ${last_hb_time_fmt}
+EOF
+            log_it ${calling_fx} NORMAL ${msg}
+        fi
+    fi
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# check_pub()
+# 
+#    Get last pub time and compare to threshold: trap_thr_time.
+#    Post fatal or normal msg based on that comparison.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+check_pub()
+    {
+    calling_fx=${FUNCNAME[0]}
+
+    last_pub_time=""
+
+    # DCAE 1.0 uses separate topic for heartbeats, Open DCAE uses single topic
+    # for everything.
+
+    if [ -z ${open_dcae_dmaap} ]
+    then
+        # DCAE 1.0:
+        #    Filenames of publisher logs include topic name so exclude
+        #    hb_topic when looking for json files. Also, wording of log
+        #    msg needs to be context-sensitive for DCAE 1.0 vs. Open DCAE.
+
+        last_json_file=`ls -1tr ${trapd_logs_dir}/*.json* 2>/dev/null | \
+                        grep -v ${hb_topic} | tail -1`
+
+        event_type_singular="trap"
+        event_type_plural="traps"
+    else
+        # Open DCAE:
+        #    Single topic so do not exclude hb_topic when looking for
+        #    json files.
+
+        last_json_file=`ls -1tr ${trapd_logs_dir}/*.json* 2>/dev/null | \
+                        tail -1`
+
+        event_type_singular="trap or heartbeat"
+        event_type_plural="traps or heartbeats"
+    fi
+
+    # Get last_pub_time.
+    if [ ! -z ${last_json_file} ] && ! check_file_empty ${last_json_file}
+    then
+        # Different methodology required for regular vs .gz file.
+        if check_file_gz ${last_json_file}
+        then
+            last_pub_time=`zcat ${last_json_file} | tail -1 | \
+                           python -m json.tool |  grep "time received" | \
+                           tail -1 | awk {'print $3'} | cut -d"," -f1`
+        else
+            last_pub_time=`tail -1 ${last_json_file} | \
+                           python -m json.tool |  grep "time received" | \
+                           tail -1 | awk {'print $3'} | cut -d"," -f1`
+        fi
+    fi
+
+    # Post FATAL if no json files found.
+    if [ -z ${last_pub_time} ]
+    then
+        # In essence, found no logs w/hb_topic in filename (or empty/missing
+        # json files for Open DCAE).
+        msg="No ${event_type_plural} published"
+        log_it ${calling_fx} FATAL ${msg}
+    else
+        time_now=`date +%s`
+        trap_thr_time=$(( time_now - trap_thr ))
+        last_pub_time_diff=$(( time_now - last_pub_time))
+        last_pub_time_fmt=`date -d @${last_pub_time}`
+
+        # Post FATAL if last publish time crosses threshold, otherwise
+        # post NORMAL.
+        if (( ${last_pub_time} <= ${trap_thr_time} ))
+        then
+            # FATAL
+            read -d '' msg <<EOF
+                Last ${event_type_singular} published
+                ${last_pub_time_diff} seconds ago at ${last_pub_time},
+                ${last_pub_time_fmt}
+EOF
+            log_it ${calling_fx} FATAL ${msg}
+        else
+            # NORMAL
+            read -d '' msg <<EOF
+                Last ${event_type_singular} published
+                ${last_pub_time_diff} seconds ago at ${last_pub_time},
+                ${last_pub_time_fmt}
+EOF
+            log_it ${calling_fx} NORMAL ${msg}
+        fi
+    fi
+    }
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# check_hb_pub()
+# 
+#    Get last hb pub time and compare to threshold: hb_thr_time.
+#    Post fatal or normal msg based on that comparison.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+check_hb_pub()
+    {
+    calling_fx=${FUNCNAME[0]}
+
+    last_hb_pub_time=""
+
+    # Filenames of publisher logs include topic name so include hb_topic
+    # here.
+    last_json_file=`ls -1tr ${trapd_logs_dir}/*.json* 2>/dev/null | \
+                    grep ${hb_topic} | tail -1`
+
+    # CHANGE for Open DCAE: Add grep for hb_notify_oid so we can be sure we're
+    # checking a heartbeat pub as opposed to a "real trap" pub. I didn't even
+    # bother to do an 'open_dcae_dmaap' check because this additional grep
+    # will not break DCAE 1.0 processing.
+
+    # UPDATE: June 2017; check_hb_pub() now runs only in DCAE 1.0 environment.
+    #         Grep for hb_notify_oid no longer required but we leave it
+    #         in case something changes again (just a minimal perf hit).
+
+    # Get last_hb_pub_time
+    if [ ! -z ${last_json_file} ]
+    then
+        # Different methodology required for regular vs .gz file.
+        if check_file_gz ${last_json_file}
+        then
+            grep_cmd=zgrep
+        else
+            grep_cmd=grep
+        fi
+
+        last_hb_pub_time=`${grep_cmd} ${hb_notify_oid} ${last_json_file} | \
+                          tail -1 | python -m json.tool | grep "time received" |\
+                          tail -1 | awk {'print $3'} | cut -d"," -f1`
+    fi
+
+    # Post FATAL if no json files found.
+    if [ -z ${last_hb_pub_time} ]
+    then
+        # Found no logs w/hb_topic in filename.
+        read -d '' msg <<EOF
+            No heartbeats published (or no heartbeat json files in
+            ${trapd_logs_dir})
+EOF
+    else
+        time_now=`date +%s`
+        hb_thr_time=$(( time_now - hb_thr ))
+        last_hb_pub_time_diff=$(( time_now - last_hb_pub_time))
+        last_hb_pub_time_fmt=`date -d @${last_hb_pub_time}`
+
+        # Post FATAL if last hb publish time crosses threshold, otherwise
+        # post NORMAL.
+        if (( ${last_hb_pub_time} <= ${hb_thr_time} ))
+        then
+            # FATAL
+            read -d '' msg <<EOF
+                Last heartbeat published ${last_hb_pub_time_diff}
+                seconds ago at ${last_hb_pub_time}, ${last_hb_pub_time_fmt}
+EOF
+            log_it ${calling_fx} FATAL ${msg}
+        else
+            # NORMAL 
+            read -d '' msg <<EOF
+                Last heartbeat published ${last_hb_pub_time_diff} seconds
+                at ${last_hb_pub_time}, ${last_hb_pub_time_fmt}
+EOF
+            log_it ${calling_fx} NORMAL ${msg}
+        fi
+    fi
+    }
+
+
+# MAIN main MAIN main
+
+# Simulate snmptrapd.sh
+cd /opt/app/snmptrap
+
+# Running config is in tmp.
+check_trapd_env
+
+# Make sure we have non-zero byte trap log files. if so, get name of last
+# non-zero byte trap log (and second-to-last, if applicable). 
+verify_trap_logs
+
+# CHANGE for Open DCAE: We're only going to check heartbeats and hertbeat pubs
+# so don't call check_traps() or check_pub() for Open DCAE.
+#
+# UPDATE: June 2017; For Open DCAE - run check_traps, check_pubs and check_hb
+#                    but not check_hb_pub.
+
+# Look for non-heartbeat traps in last 2 non-empty trap logs (if applicable).
+check_traps
+
+# For DCAE 1.0:  Any non-hb traps being published?
+# For Open DCAE: Anything being published?
+check_pub
+
+# Look for heartbeat traps (in last/newest trap log only).
+check_hb
+
+# DCAE 1.0 (only): Any heartbeat traps being published?
+if [ -z ${open_dcae_dmaap} ]
+then
+    check_hb_pub
+fi
+
+exit 0

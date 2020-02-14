@@ -1,7 +1,5 @@
-# ============LICENSE_START=======================================================)
-# org.onap.dcae
-# ================================================================================
-# Copyright (c) 2018 AT&T Intellectual Property. All rights reserved.
+# ============LICENSE_START=======================================================
+# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============LICENSE_END=========================================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
 """
 """
 
@@ -81,10 +76,12 @@ def init():
     first_varbind = True
     global trap_dict
     trap_dict = {}
-    global all_traps_str
-    all_traps_str = ""
+    global all_traps_json_str
+    all_traps_json_str = ""
     global all_vb_json_str
     all_vb_json_str = ""
+    global all_vb_str
+    all_vb_str = ""
     global trap_uuids_in_buffer
     trap_uuids_in_buffer = ""
     # </trap and varbind dictionaries>
@@ -138,8 +135,6 @@ def init():
     global sw_count_dict
     sw_count_dict = {}
 
-    global sw_interval_in_seconds
-    sw_interval_in_seconds = 60
     # </stormwatch >
 
     # <logging types and severities>
@@ -161,14 +156,14 @@ def init():
     global SEV_DETAILED
     global SEV_INFO
     global SEV_WARN
-    global SEV_CRIT
+    global SEV_ERROR
     global SEV_FATAL
-    SEV_TYPES = ["none", "DETAILED", "INFO", "WARN", "CRITICAL", "FATAL"]
+    SEV_TYPES = ["none", "DETAILED", "INFO", "WARN", "ERROR", "FATAL"]
     SEV_NONE = 0
     SEV_DETAILED = 1
     SEV_INFO = 2
     SEV_WARN = 3
-    SEV_CRIT = 4
+    SEV_ERROR = 4
     SEV_FATAL = 5
 
     global CODE_GENERAL

@@ -1,7 +1,5 @@
 # ============LICENSE_START=======================================================
-# org.onap.dcae
-# ================================================================================
-# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============LICENSE_END=========================================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
 """
 trapd_http_session establishes an http session for future use in publishing
 messages to the dmaap cluster.
@@ -79,7 +74,6 @@ def close_session_obj(_loc_http_requ_session):
       none
     """
 
-
     # Close existing session if present.
     if _loc_http_requ_session is not None:
         try:
@@ -87,7 +81,8 @@ def close_session_obj(_loc_http_requ_session):
             return True
         except Exception as e:
             msg = "Unable to close current http session - FATAL ERROR, exiting"
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL,
+                         tds.CODE_GENERAL, msg)
             stdout_logger(msg)
             cleanup_and_exit(1, tds.pid_file_name)
 
@@ -110,7 +105,6 @@ def reset_session_obj(_loc_http_requ_session):
     :Variables:
       none
     """
-
 
     # close existing http_requ_session if present
     ret = close_session_obj(_loc_http_requ_session)
