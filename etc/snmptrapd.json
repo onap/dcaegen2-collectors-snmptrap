@@ -1,6 +1,6 @@
 {
     "snmptrapd": {
-        "version": "1.4.0",
+        "version": "2.0",
         "title": "ONAP SNMP Trap Receiver"
     },
     "protocols": {
@@ -11,12 +11,12 @@
         "ipv6_port": 6162
     },
     "cache": {
-        "dns_cache_ttl_seconds": 60
+        "dns_cache_ttl_seconds": 10800
     },
     "publisher": {
-        "http_milliseconds_timeout": 1500,
-        "http_retries": 3,
-        "http_milliseconds_between_retries": 750,
+        "http_milliseconds_timeout": 500,
+        "http_retries": 2,
+        "http_milliseconds_between_retries": 250,
         "http_primary_publisher": "true",
         "http_peer_publisher": "unavailable",
         "max_traps_between_publishes": 10,
@@ -49,8 +49,37 @@
         "eelf_debug": "debug.log",
         "eelf_audit": "audit.log",
         "eelf_metrics": "metrics.log",
-        "roll_frequency": "day",
+        "roll_frequency": "hour",
         "minimum_severity_to_log": 3
+    },
+    "check_hb_traps": {
+        "trap_thr": 900,
+        "hb_thr": 900,
+        "hb_notify_oid": ".1.3.6.1.4.1.74.2.46.12.1.1"
+    },
+    "trap_config": {
+       "sw_interval_in_seconds": 60,
+       "metric_log_notification_threshold_pct": 25,
+       "notify_oids": [
+           {
+               "oid": ".1.3.6.1.4.1.9.0.1",
+               "sw_high_water_in_interval": 100,
+               "sw_low_water_in_interval": 5,
+               "category": "logonly"
+           },
+           {
+               "oid": ".1.3.6.1.4.1.9.0.2",
+               "sw_high_water_in_interval": 200,
+               "sw_low_water_in_interval": 10,
+               "category": "logonly"
+           },
+           {
+               "oid": ".1.3.6.1.4.1.9.0.3",
+               "sw_high_water_in_interval": 300,
+               "sw_low_water_in_interval": 15,
+               "category": "logonly"
+           }
+       ]
     },
     "snmpv3_config": {
         "usm_users": [
