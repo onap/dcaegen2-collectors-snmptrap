@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============LICENSE_END=========================================================
+"""
+"""
 
-# empty __init__.py so that pytest can add correct path to coverage report, -- per pytest
-# best practice guideline
+__docformat__ = 'restructuredtext'
+
+
+def init():
+
+    # <stats>
+    #
+    #     oid_counter_dict
+    #        key [<notify oid>] -> count
+    #
+    #     agent_counter_dict
+    #        key [<agent>] -> count
+    #
+    global oid_counter_dict
+    oid_counter_dict = {}
+
+    global agent_counter_dict
+    agent_counter_dict = {}
+
+    global total_notifications
+    total_notifications = 0
+
+    global metric_log_notification_threshold_pct
+    metric_log_notification_threshold_pct = 25
+
+    # </stats>

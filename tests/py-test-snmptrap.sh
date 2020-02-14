@@ -1,5 +1,6 @@
+#!/bin/env bash
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,5 +15,12 @@
 # limitations under the License.
 # ============LICENSE_END=========================================================
 
-# empty __init__.py so that pytest can add correct path to coverage report, -- per pytest
-# best practice guideline
+# export CBS_SIM_JSON=/opt/app/snmptrap/etc/snmptrapd.json
+export PYTHONPATH=/opt/app/snmptrap/bin:/opt/app/snmptrap/bin/mod:$PYTHONPATH
+
+# cd /opt/app/snmptrap
+cd /opt/app
+
+py.test --cov-config /opt/app/snmptrap/tests/.coveragerc --cov=snmptrap /opt/app/snmptrap/tests/
+# py.test --cov=snmptrap /opt/app/snmptrap/tests/
+coverage report -m

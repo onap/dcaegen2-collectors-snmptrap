@@ -1,7 +1,5 @@
-# ============LICENSE_START=======================================================)
-# org.onap.dcae
-# ================================================================================
-# Copyright (c) 2018 AT&T Intellectual Property. All rights reserved.
+# ============LICENSE_START=======================================================
+# Copyright (c) 2018-2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============LICENSE_END=========================================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
 """
 """
 
@@ -180,7 +175,7 @@ def roll_file(_loc_file_name):
             _msg = ("ERROR: Unable to rename %s to %s"
                     % (_loc_file_name,
                        _loc_file_name_bak))
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_CRIT,
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_ERROR,
                          tds.CODE_GENERAL, _msg)
             return False
 
@@ -230,6 +225,7 @@ def close_file(_loc_fd, _loc_filename):
 # fx: ecomp_logger -> log in eelf format until standard
 #     is released for python via LOG-161
 # # # # # # # # # # ## # # # # # # #
+
 
 def ecomp_logger(_log_type, _sev, _error_code, _msg):
     """
@@ -309,10 +305,10 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
 
     # above were various attempts at setting time string found in other
     # libs; instead, let's keep it real:
-    t_out = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S,%f")[:-3]
+    t_out = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
     calling_fx = inspect.stack()[1][3]
 
-    # DLFM: this entire module is a hack to override concept of prog logging
+    # DLFM: this entire module is a xyz to override concept of prog logging
     #        written across multiple files (???), making diagnostics IMPOSSIBLE!
     #        Hoping to leverage ONAP logging libraries & standards when available
 
@@ -331,14 +327,19 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
     if _sev >= tds.minimum_severity_to_log:
         # log to appropriate eelf log (different files ??)
         if _log_type == tds.LOG_TYPE_ERROR:
-            _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
-                        % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
+            # _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
+            # _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
+            #            % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
+            _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s'
+                        % (unused, unused, calling_fx, unused, "snmptrapd", unused, unused, unused, unused, unused, unused, unused, tds.SEV_TYPES[_sev], unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, _msg))
             try:
-                tds.eelf_error_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+                tds.eelf_error_fd.write('%s|%s|%s\n' % (t_out, t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
         elif _log_type == tds.LOG_TYPE_AUDIT:
             # log message in AUDIT format
+            # _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
+            #             % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
             _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
                         % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
             try:
@@ -358,8 +359,8 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
         # DLFM: too much I/O !!!
         # always write to debug; we need ONE logfile that has time-sequence full view !!!
         # log message in DEBUG format
-        _out_rec = ("%s|%s|%s|%s|%s|%s|%s|%s|%s"
-                    % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
+        _out_rec = ("%s|%s|%s|%s|%s|%s|%s|%s|%s|%s"
+                    % (unused, calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
         try:
             tds.eelf_debug_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
         except Exception as e:

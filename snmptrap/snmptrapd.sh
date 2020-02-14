@@ -1,47 +1,68 @@
 #!/usr/bin/env bash
 #
 # ============LICENSE_START=======================================================
-# org.onap.dcae
-# ================================================================================
-# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #      http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============LICENSE_END=========================================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
 
 # basics
 current_cmd=`basename $0`
 current_module=`echo $current_cmd | cut -d"." -f1`
 
-# FMDL:: need to pick up these values from json config, but it isn't
-#        present at startup
-base_dir=/opt/app/snmptrap
-pid_file=${base_dir}/tmp/${current_module}.py.pid
+# get base_dir from current script invocation
+bin_base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+base_dir=`dirname ${bin_base_dir}`
+
+snmptrapd_pid_file=${base_dir}/tmp/${current_module}.py.pid
+scheduler_pid_file=${base_dir}/tmp/scheduler.sh.pid
+
 start_dir=${base_dir}/bin
+
+# global return code
+#  - required because functions ultimately call log_msg, which
+#    is to stdout, which conflicts with "echo <return_value>"
+#    in the functions themselves
+g_return=0
 
 # include path to 3.6+ version of python that has required dependencies included
 export PATH=/opt/app/python-3.6.1/bin:$PATH
 
 # set location of SSL certificates
-export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-bundle.crt
+# export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-bundle.crt	# open source/external world
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt	# otherwise...
 
-# get to where we are supposed to be for startup
-cd /opt/app/snmptrap/bin
+# find the best tool for the job
+if [ `command -v pypy3` ]
+then
+   PY_BINARY=pypy3
+else
+   if [ `command -v python3` ]
+   then
+      PY_BINARY=python3
+   else
+      if [ `command -v python` ]
+      then
+         PY_BINARY=python
+      else
+         echo "ERROR: no pypy3 or python available in container - FATAL ERROR, exiting"
+         exit 1
+      fi
+   fi
+fi
 
 # expand search for python modules to include ./mod in current/runtime dir
-export PYTHONPATH=./mod:./:$PYTHONPATH
+export PYTHONPATH=${bin_base_dir}/mod:$PYTHONPATH
 
 # PYTHONUNBUFFERED:
 #    set PYTHONUNBUFFERED to a non-empty string to avoid output buffering; 
@@ -50,7 +71,10 @@ export PYTHONPATH=./mod:./:$PYTHONPATH
 
 # set location of config broker server overrride IF NEEDED
 #
-export CBS_SIM_JSON=../etc/snmptrapd.json
+export CBS_SIM_JSON=${base_dir}/etc/snmptrapd.json
+
+# misc
+exit_after=1
 
 # # # # # # # # # # 
 # log_msg - log messages to stdout in standard manner
@@ -59,7 +83,43 @@ log_msg()
 {
    msg=$*
 
-   printf "`date +%Y-%m-%dT%H:%M:%S,%N | cut -c1-23` ${msg}"
+   echo "`date +%Y-%m-%dT%H:%M:%S,%N | cut -c1-23` ${msg}" 
+}
+
+#
+# start process
+#
+start_process()
+{
+process_name=$1
+pid_file=$2
+exec_cmd=$3
+
+   # check if exec_cmd has a pid_file 
+   if [ ! -r ${pid_file} ]
+   then
+      log_msg "Starting ${process_name}"
+      stdout_fd=${base_dir}/logs/${process_name}.out
+      if [ -f ${stdout_fd} ]
+      then
+         mv -f ${stdout_fd} ${stdout_fd}.bak
+      fi
+      ${exec_cmd} >> ${base_dir}/logs/${process_name}.out 2>&1 &
+      g_return=$?
+      echo $! > ${pid_file}
+   else
+      pid=$(cat ${pid_file})
+      if ps -p ${pid} > /dev/null
+      then
+         g_return=$?
+         log_msg "${process_name} already running - PID ${pid}"
+      else
+         log_msg "PID file present, but no corresponding process.  Starting ${process_name}"
+         ${exec_cmd} >> ${base_dir}/logs/${process_name}.out 2>&1 &
+         g_return=$?
+         echo $! > ${pid_file}
+      fi
+   fi
 }
 
 # # # # # # # # # # 
@@ -69,113 +129,142 @@ start_service()
 {
    # Hints for startup modifications:
    # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+   # handy for debug (e.g. docker logs output)
+   # log_msg "Runtime env present for ${current_module} placed in ${base_dir}/logs/${current_module}.out"
+   env >>  ${base_dir}/logs/${current_module}.out
+
    # standard startup?  Use this:
-   cmd="python ./snmptrapd.py"
+   cmd="${PY_BINARY} ${base_dir}/bin/snmptrapd.py"
    # want tracing?  Use this:
-   #     cmd="python ./snmptrapd.py -v"
+   # cmd="${PY_BINARY} ./snmptrapd.py -v"
    # unbuffered io for logs? Use this:
-   #     cmd="python -u ./snmptrapd.py"
+   #     cmd="${PY_BINARY} -u ./snmptrapd.py"
    # fmdl: needs further research
-   #     cmd="python -m trace --trackcalls ./snmptrapd.py"
+   #     cmd="${PY_BINARY} -m trace --trackcalls ./snmptrapd.py"
 
    cd ${start_dir}
 
-   # check for process already running
-   if [ -r ${pid_file} ]
+   #
+   # scheduler
+   #
+   start_process scheduler ${scheduler_pid_file} "${bin_base_dir}/scheduler.sh"
+   if [ ${g_return} -ne 0 ]
    then
-      pid=$(cat ${pid_file})
-      if ps -p ${pid} > /dev/null
-      then
-         printf "${current_module} already running - PID ${pid}\n"
-         return 0
-      fi
+       log_msg "ERROR!  Unable to start scheduler.  Check logs for details."
    fi
 
-   # FMDL:: do this in snmptrapd.py at startup
-   # roll log if present at startup
-   # if [ -f ${LOGFILE} ]
-   # then
-      # mv -f ${LOGFILE} ${LOGFILE}.`date +%h-%m-%Y_%H:%M:%S`
-   # fi
-
-   log_msg "Starting ${current_module}...  "
-   eval ${cmd}
-   return_code=$?
-
-   if [ ${return_code} -eq 0 ]
+   #
+   # snmptrapd
+   #
+   start_process ${current_module} ${snmptrapd_pid_file} "${cmd}"
+   if [ ${g_return} -ne 0 ]
    then
-       log_msg "Started.\n"
-   else
-       log_msg "\nERROR!  Unable to start ${current_module}.  Check logs for details.\n"
+       log_msg "ERROR!  Unable to start ${current_module}.  Check logs for details."
    fi
-
-   return ${return_code}
-
 }
 
 # # # # # # # # # # 
 # Stop the service
 # # # # # # # # # # 
-stop_service()
+stop_process()
 {
+process_name=$1
+pid_file=$2
+
     if [ ! -r ${pid_file} ]
     then
-        log_msg "PID file ${pid_file} does not exist or not readable - unable to stop specific instance of ${current_module}.\n"
-        log_msg "Diagnose further at command line as needed.\n"
-        return_code=1
+        log_msg "PID file ${pid_file} does not exist or not readable - unable to stop ${process_name}"
+        g_return=1
     else
         pid=$(cat ${pid_file})
-        log_msg "Stopping ${current_module} PID ${pid}...\n"
-        kill ${pid}
-        if [ $? -ne 0 ]
+        pgrep -f ${process_name} | grep "^${pid}" > /dev/null
+        loc_return=$?
+        if [ ${loc_return} -eq 0 ]
         then
-            log_msg "\nERROR while trying to terminate ${current_module} PID ${pid} (is it not running or owned by another userID?)"
-            log_msg "\nDiagnose further at command line as needed."
-            return_code=$?
-            if [ -w ${pid_file} ]
+            log_msg "Stopping ${process_name} PID ${pid}..."
+            kill ${pid}
+            g_return=$?
+            if [ ${g_return} -eq 0 ]
             then
-                rm -f ${pid_file}
+                log_msg "Stopped"
+            else
+                log_msg "ERROR while terminating ${process_name} PID ${pid} (is it not running or owned by another userID?)"
             fi
         else
-            log_msg "Stopped\n"
-            if [ -w ${pid_file} ]
-            then
-                rm -f ${pid_file}
-            fi
-            return_code=0
+            log_msg "${process_name} PID ${pid} not present - skipping"
+        fi
+
+        if [ -w ${pid_file} ]
+        then
+           rm -f ${pid_file}
         fi
     fi
+}
 
-    return ${return_code}
+# # # # # # # # # # # # # # #
+# stop all snmptrapd services
+# # # # # # # # # # # # # # #
+stop_service()
+{
+   # scheduler
+   #
+   stop_process scheduler ${scheduler_pid_file}
+
+   # snmptrapd
+   #
+   stop_process ${current_module} ${snmptrapd_pid_file}
 }
 
 # # # # # # # # # # # # # # #
 # Check status of the service
 # # # # # # # # # # # # # # #
-status_service()
+status_process()
 {
+process_name=$1
+pid_file=$2
+
     if [ -r ${pid_file} ]
     then
         pid=$(cat ${pid_file})
-        pgrep -f ${current_module}.py | grep "^${pid}" > /dev/null
-        return_code=$?
+        pgrep -f ${process_name} | grep "^${pid}" > /dev/null
+        loc_return=$?
 
-        if [ ${return_code} -eq 0 ]
+        if [ ${loc_return} -eq 0 ]
         then
-            log_msg "Status: ${current_module} running\n"
-            ps -f -p ${pid} -f | grep -v PID
-            return_code=0
+            log_msg "- ${process_name} running, PID ${pid}"
+            # ps -f -p ${pid} -f | grep -v PID
+            g_return=0
         else
-            log_msg "Status: ERROR! ${current_module} not running.\n"
-            return_code=1
+            log_msg "ERROR! ${process_name} not running"
+            g_return=1
         fi
    else
-        log_msg "PID file ${pid_file} does not exist or not readable - unable to check status of ${current_module}\n"
-        log_msg "Diagnose further at command line as needed.\n"
-        return 1
+        log_msg "PID file ${pid_file} does not exist or not readable - unable to check status of ${process_name}"
+        g_return=1
     fi
+}
 
-    return ${return_code}
+#
+#
+#
+status_service()
+{
+   # scheduler
+   #
+   status_process scheduler  ${scheduler_pid_file}
+   loc_return=${g_return}
+
+   # snmptrapd
+   #
+   status_process ${current_module} ${snmptrapd_pid_file}
+   loc_return=$((loc_return+g_return))
+   if [ ${loc_return} -ne 0 ]
+   then
+      log_msg "Overall Status: CRITICAL - Required process(es) missing!"
+   else
+      log_msg "Overall Status: Normal"
+   fi
 }
 
 # # # # # # # # # # # # # # # # #
@@ -183,62 +272,95 @@ status_service()
 # # # # # # # # # # # # # # # # #
 reload_cfg()
 {
-    if [ -r ${pid_file} ]
+    # only needed for snmptrapd
+    if [ -r ${snmptrapd_pid_file} ]
     then
-       pid=$(cat ${pid_file})
+       pid=$(cat ${snmptrapd_pid_file})
        ps -p ${pid} > /dev/null 2>&1
-       ret=$?
-       if [ ${ret} ]
+       loc_return=$?
+       if [ ${loc_return} ]
        then
-          log_msg "Signaling ${current_module} PID ${pid} to request/read updated configs...\n"
+          log_msg "Signaling ${current_module} PID ${pid} to request/read updated configs..."
           kill -USR1 ${pid}
-          return_code=$?
-          if [ ${return_code} -eq 0 ]
+          g_return=$?
+          if [ ${g_return} -eq 0 ]
           then
-              log_msg "...Signal complete.\n"
+              log_msg "...Signal complete."
           else
-              log_msg "\nERROR signaling ${current_module} - diagnose further at the command line.\n"
+              log_msg "ERROR signaling ${current_module} (do you have permissions to do this?)"
           fi
        else
-          log_msg "\nERROR: ${current_module} PID ${pid} does not appear to be running.\n"
-          return_code=1
+          log_msg "ERROR: ${current_module} PID ${pid} does not appear to be running."
        fi
     else
-       log_msg "\nERROR: ${current_module} pid_file ${pid_file} does not exist - unable to signal for config re-read.\n"
-       return_code=1
+       log_msg "ERROR: ${snmptrapd_pid_file} does not exist - unable to signal for config re-read."
+       g_return=1
     fi
+}
 
-    return ${return_code}
+# # # # # # # # # # # # # # #
+# stop all snmptrapd services
+# # # # # # # # # # # # # # #
+version()
+{
+exit_swt=$1
+
+version_fd=${base_dir}/etc/version.dat
+if [ -f ${version_fd} ]
+then
+   version_string=`cat ${version_fd}`
+   log_msg "${version_string}"
+   ec=0
+else
+   log_msg "ERROR: unable to determine version"
+   ec=1
+fi
+
+if [ "${exit_swt}" == "${exit_after}" ]
+then
+   exit ${ec}
+fi
+
 }
 
 # # # # # # # # # # # # #
 # M A I N
 # # # # # # # # # # # # #
 
+
 case "$1" in
    "start")
+          version
           start_service
-          exit $?
+          sleep 1
+          status_service
+          wait
           ;;
    "stop") 
+          version
           stop_service
-          exit $?
           ;;
    "restart")
+          version
           stop_service
           sleep 1
           start_service
-          exit $?
+          status_service
           ;;
    "status") 
+          version
           status_service
-          exit $?
           ;;
    "reloadCfg")
+          version
           reload_cfg
-          exit $?
+          ;;
+   "version")
+          version ${exit_after}
           ;;
    *)
-          printf "\nUsage: ${current_cmd} {start|stop|restart|status|rollLog|reloadCfg}\n"
-          exit 1
+          echo "Usage: ${current_cmd} {start|stop|restart|status|reloadCfg|version}"
+          g_return=1
    esac
+
+exit ${g_return}

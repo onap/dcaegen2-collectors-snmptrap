@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ import pytest
 import unittest
 import trapd_exit
 
-pid_file="/tmp/test_pid_file"
-pid_file_dne="/tmp/test_pid_file_NOT"
-
-import trapd_settings as tds
+import trapd_stormwatch as sw 
+import trapd_stormwatch_settings as sws 
+import trapd_stats_settings as stats
 
 class test_cleanup_and_exit(unittest.TestCase):
     """
@@ -29,60 +28,27 @@ class test_cleanup_and_exit(unittest.TestCase):
     """
  
 
-    def test_nonexistent_dict(self):
+    def test_increment_existing_counter(self):
         """
-        Test nosuch var
+        Test increment counter
         """
-        tds.init()
-        try:
-            tds.no_such_var
-            result = True
-        except:
-            result = False
+        sw.sw_init()
+        stats.init()
 
-        self.assertEqual(result, False)
- 
-    def test_config_dict(self):
-        """
-        Test config dict
-        """
-        tds.init()
-        try:
-            tds.c_config
-            result = True
-        except:
-            result = False
+        oid=".1.2.3.4.5.6"
+        sws.sw_config_oid_dict[oid] = True
+        sws.sw_config_low_water_in_interval_dict[oid] = 1
+        sws.sw_config_high_water_in_interval_dict[oid] = 10
 
-        self.assertEqual(result, True)
- 
-    def test_dns_cache_ip_to_name(self):
-        """
-        Test dns cache name dict 
-        """
-
-        tds.init()
         try:
-            tds.dns_cache_ip_to_name
+            sw.stats_increment_counters("192.168.1.1", ".1.2.3.4.5.6")
             result = True
         except:
             result = False
 
         self.assertEqual(result, True)
 
-    def test_dns_cache_ip_expires(self):
-        """
-        Test dns cache ip expires dict 
-        """
-
-        tds.init()
-        try:
-            tds.dns_cache_ip_expires
-            result = True
-        except:
-            result = False
-
-        self.assertEqual(result, True)
 
 if __name__ == '__main__':
-    # tds.init()
+    # sws.init()
     unittest.main()
