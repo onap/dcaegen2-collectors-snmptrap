@@ -22,6 +22,550 @@
       "revId": "cf55fae1be17e38de62875062fb384988d575daa",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6ad16e2_e1c82020",
+        "filename": "snmptrap/__init__.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020\nthe first year of copyright must never be lost",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0579196_f0836494",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "this is more canonical:\nif [ \"${value}\" \u003d \"null\" -o -z \"${value}\" ]\n\nbut it\u0027s really a stylistic choice",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5a2a08c_4a161059",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need \"\" around ${file_to_check}, as in\ncheck_file_gz \"${file_to_check}\"\n\nif the path or filename have a space in it, check_file_gz will only look at the portion up to the first space",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdb6f086_3c2b648f",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "again, need \"\" around ${file_to_check}",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7bb1971_23f96c3d",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "525e30ed_e5b8c6c1",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need \"\" around ${trapd_arriving_traps_fname}",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92f497b2_d5170a97",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "this code assumes that the only whitespace in trap_log_list is the newline between filenames",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a77d2eab_db05580c",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "if there are spaces in the resulting files, this will have a totally wrong number.\nIf there are newlines in the filename, then it\u0027s even worse.\nFor hardening, you cannot assume anything about the filenames.\n\nOne way to find the number of names is\n\nnum_trapd_logs\u003d$( find . -name \"*${trapd_arriving_traps_fname}*\" -exec stat -c FILE {} + | wc -l )\nthis converts each filename to the word FILE and then uses wc to count the lines.",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "386ee4a6_7163722e",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "if the filenames have whitespace in them, this will be wrong. Do the glob expansion here to prevent issues:\n\nfor f in *${trapd_arriving_traps_fname}*",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c3c89fd_8aa83264",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need \"\" around ${f}",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fab1c71c_d65bf739",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "same comments as above",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af18b4b0_852b1958",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "same comments as above",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "384ac753_44b7b92e",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "same comments as above",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bae11c4_e2570d5b",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "same comments as above",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c82a949_c7f6520d",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need \"\" around ${last_trap_log_nz}",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b59c946_6271cae3",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60d0fd1e_91f94db3",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need \"\" around ${sec_log_to_check}",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a42285d_a783f565",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need \"\" around ${sec_trap_log_nz}",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7259dd7a_620d4084",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "need \"\" around both ${hb_topic} and ${sec_trap_log_nz}",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b143feb_c7d1043e",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "more canonical to use\n [ ! -z ${last_trap_time} -a ! -z ${last_trap_time_sec_log} ]\nbut that is a stylistic nit",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d2979ff_36fd1a0c",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "did you intend to have a ) after (dated ???",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd42e9b0_781a5bf7",
+        "filename": "snmptrap/check_hb_traps",
+        "patchSetId": 1
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "stopped scanning code here",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f14a12a5_6e9a0d7d",
+        "filename": "snmptrap/healthcheck.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020\n\ncan\u0027t lose starting year",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ef8b264_5862e484",
+        "filename": "snmptrap/healthcheck.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "these two lines are not really necessary. bash always returns the exit code of the last command executed.",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50a57dfd_4f1183e4",
+        "filename": "snmptrap/mod/__init__.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ce9b143_beaa9cbb",
+        "filename": "snmptrap/mod/trapd_exit.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "590656a5_cccd0a03",
+        "filename": "snmptrap/mod/trapd_get_cbs_config.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40fde332_321679b8",
+        "filename": "snmptrap/mod/trapd_http_session.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad6356c5_64b46a2d",
+        "filename": "snmptrap/mod/trapd_io.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7f16f69_481865e9",
+        "filename": "snmptrap/mod/trapd_runtime_pid.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "964fc663_c0926186",
+        "filename": "snmptrap/mod/trapd_settings.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19d5f726_ff74c8bb",
+        "filename": "snmptrap/mod/trapd_snmpv3.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2020-02-17T20:37:27Z",
+      "side": 1,
+      "message": "2018-2020",
+      "revId": "cf55fae1be17e38de62875062fb384988d575daa",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
