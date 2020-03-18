@@ -80,14 +80,22 @@ def sw_clear_dicts():
     :Variables:
     """
     try:
-        stats.oid_counter_dict.clear()
-        stats.agent_counter_dict.clear()
-        sws.sw_storm_active_dict.clear()
-        sws.sw_storm_counter_dict.clear()
-        sws.sw_config_oid_dict.clear()
-        sws.sw_config_low_water_in_interval_dict.clear()
-        sws.sw_config_high_water_in_interval_dict.clear()
-        sws.sw_config_category.clear()
+        if hasattr(stats, "oid_counter_dict"):
+            stats.oid_counter_dict.clear()
+        if hasattr(stats, "agent_counter_dict"):
+            stats.agent_counter_dict.clear()
+        if hasattr(sws, "sw_storm_active_dict"):
+            sws.sw_storm_active_dict.clear()
+        if hasattr(sws, "sw_storm_counter_dict"):
+            sws.sw_storm_counter_dict.clear()
+        if hasattr(sws, "sw_config_oid_dict"):
+            sws.sw_config_oid_dict.clear()
+        if hasattr(sws, "sw_config_low_water_in_interval_dict"):
+            sws.sw_config_low_water_in_interval_dict.clear()
+        if hasattr(sws, "sw_config_high_water_in_interval_dict"):
+            sws.sw_config_high_water_in_interval_dict.clear()
+        if hasattr(sws, "sw_config_category"):
+            sws.sw_config_category.clear()
         return True
     except Exception as e:
         msg = "unable to reset stormwatch dictionaries - results will be indeterminate: %s" % (
@@ -367,6 +375,8 @@ def sw_storm_active(_loc_agent, _loc_oid):
     # if we got this far, trap is in stormwatch configs, we've incremented
     # counter in sw_storm_counter_dict - figure out if we are over limit
     if sws.sw_storm_counter_dict[_dict_key] > _high_water_val:
+        print(f"sws.sw_storm_counter_dict[{_dict_key}]({sws.sw_storm_counter_dict[_dict_key]}) > _high_water_val ({_high_water_val})")
+
         _loc_agent = _dict_key.split()[0]
         _loc_oid = _dict_key.split()[1]
         msg = "STORM ACTIVE: received %d events (%s) from %s (greater than high water threshold: %d)" % (
@@ -381,6 +391,7 @@ def sw_storm_active(_loc_agent, _loc_oid):
                          tds.CODE_GENERAL, msg)
         return True
     else:
+        print(f"NOT sws.sw_storm_counter_dict[{_dict_key}]({sws.sw_storm_counter_dict[_dict_key]}) > _high_water_val ({_high_water_val})")
         return False
 
 # # # # # # # # # # # # #
