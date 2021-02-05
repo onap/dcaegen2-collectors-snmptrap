@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ce181f0_dd84e916",
+        "filename": "coverage.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 6044
+      },
+      "writtenOn": "2021-02-05T08:27:21Z",
+      "side": 1,
+      "message": "Should that be in the repository?",
+      "revId": "de9d4a5fd933e86f021a2d79bbf05e5cf9c5b3cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
