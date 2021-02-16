@@ -16,6 +16,24 @@
       "revId": "de9d4a5fd933e86f021a2d79bbf05e5cf9c5b3cf",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7a3581b_32cc0732",
+        "filename": "coverage.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-02-16T21:36:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ce181f0_dd84e916",
+      "revId": "de9d4a5fd933e86f021a2d79bbf05e5cf9c5b3cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
