@@ -3,3 +3,4 @@ requests==2.18.3
 onap_dcae_cbs_docker_client==2.1.0
 asyncio
 pathlib
+yaml
