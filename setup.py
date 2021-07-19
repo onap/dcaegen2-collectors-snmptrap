@@ -1,6 +1,6 @@
 # org.onap.dcae
 # ================================================================================
-# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
 # Copyright 2021 Deutsche Telekom. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,12 +28,13 @@ from setuptools import setup, find_packages
 setup(
     name = "snmptrap",
     description = "snmp trap receiver for ONAP docker image",
-    version = "2.0.4",
+    version = "2.0.5",
     packages=find_packages(),
     install_requires=[
         "pysnmp==4.4.12",
         "requests==2.18.3",
-        "onap_dcae_cbs_docker_client==2.1.0"
+        "onap_dcae_cbs_docker_client==2.2.1",
+	"pyyaml"
     ],
     author = "Dave L",
     author_email = "dl3158@att.com",
