@@ -1,0 +1,9 @@
+distribution_type: 'container'
+version: '2.0.5'
+project: 'dcaegen2-collectors-snmptrap'
+log_dir: 'dcaegen2-collectors-snmptrap-master-release-version-java-daily/1292/'
+containers:
+  - name: 'org.onap.dcaegen2.collectors.snmptrap'
+    version: '2.0.5-SNAPSHOT-20210803T033631Z'
+container_release_tag: '2.0.5'
+ref: '475a64860f8909a59206308a666b5a4e078dedf3'
