@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Remigiusz Janeczek <remigiusz.janeczek@nokia.com>
+Submitted-by: Remigiusz Janeczek <remigiusz.janeczek@nokia.com>
+Submitted-at: Tue, 03 Aug 2021 21:01:49 +0000
+Reviewed-on: https://gerrit.onap.org/r/c/dcaegen2/collectors/snmptrap/+/123079
+Project: dcaegen2/collectors/snmptrap
+Branch: refs/heads/master
