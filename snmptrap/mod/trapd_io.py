@@ -303,6 +303,9 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
 
     unused = ""
 
+    # new requirement to send all logs to stdout
+    log_to_stdout = True
+
     # above were various attempts at setting time string found in other
     # libs; instead, let's keep it real:
     t_out = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
@@ -319,6 +322,8 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
                     % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, (msg + _msg)))
         try:
             tds.eelf_error_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+            if log_to_stdout:
+                print('%s|%s' % (t_out, str(_out_rec)))
         except Exception as e:
             stdout_logger(str(_out_rec))
 
@@ -334,6 +339,8 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
                         % (unused, unused, calling_fx, unused, "snmptrapd", unused, unused, unused, unused, unused, unused, unused, tds.SEV_TYPES[_sev], unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, _msg))
             try:
                 tds.eelf_error_fd.write('%s|%s|%s\n' % (t_out, t_out, str(_out_rec)))
+                if log_to_stdout:
+                    print('%s|%s|%s' % (t_out, t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
         elif _log_type == tds.LOG_TYPE_AUDIT:
@@ -344,6 +351,8 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
                         % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
             try:
                 tds.eelf_audit_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+                if log_to_stdout:
+                    print('%s|%s' % (t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
         elif _log_type == tds.LOG_TYPE_METRICS:
@@ -352,6 +361,8 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
                         % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
             try:
                 tds.eelf_metrics_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+                if log_to_stdout:
+                    print('%s|%s' % (t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
 
@@ -363,6 +374,8 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
                     % (unused, calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
         try:
             tds.eelf_debug_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+            if log_to_stdout:
+                print('%s|%s' % (t_out, str(_out_rec)))
         except Exception as e:
             stdout_logger(str(_out_rec))
 

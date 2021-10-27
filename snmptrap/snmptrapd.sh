@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+# -*- indent-tabs-mode: nil -*- # vi: set expandtab:
 #
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,7 +105,7 @@ exec_cmd=$3
       then
          mv -f ${stdout_fd} ${stdout_fd}.bak
       fi
-      ${exec_cmd} >> ${base_dir}/logs/${process_name}.out 2>&1 &
+      ${exec_cmd} 2>&1 | tee -a ${base_dir}/logs/${process_name}.out &
       g_return=$?
       echo $! > ${pid_file}
    else
@@ -115,7 +116,7 @@ exec_cmd=$3
          log_msg "${process_name} already running - PID ${pid}"
       else
          log_msg "PID file present, but no corresponding process.  Starting ${process_name}"
-         ${exec_cmd} >> ${base_dir}/logs/${process_name}.out 2>&1 &
+         ${exec_cmd} 2>&1 | tee -a ${base_dir}/logs/${process_name}.out &
          g_return=$?
          echo $! > ${pid_file}
       fi
@@ -303,23 +304,23 @@ reload_cfg()
 # # # # # # # # # # # # # # #
 version()
 {
-exit_swt=$1
+    exit_swt=$1
 
-version_fd=${base_dir}/etc/version.dat
-if [ -f ${version_fd} ]
-then
-   version_string=`cat ${version_fd}`
-   log_msg "${version_string}"
-   ec=0
-else
-   log_msg "ERROR: unable to determine version"
-   ec=1
-fi
+    version_fd=${base_dir}/etc/version.dat
+    if [ -f ${version_fd} ]
+    then
+        version_string=`cat ${version_fd}`
+        log_msg "${version_string}"
+        ec=0
+    else
+        log_msg "ERROR: unable to determine version"
+        ec=1
+    fi
 
-if [ "${exit_swt}" == "${exit_after}" ]
-then
-   exit ${ec}
-fi
+    if [ "${exit_swt}" = "${exit_after}" ]
+    then
+        exit ${ec}
+    fi
 
 }
 
