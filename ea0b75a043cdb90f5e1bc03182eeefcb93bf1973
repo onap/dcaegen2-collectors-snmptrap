@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e253c68_31a25f54",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-10-29T02:55:21Z",
+      "side": 1,
+      "message": "Shld be reverted",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 15
+      },
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2397d4a3_e59a5cb5",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-10-29T02:55:21Z",
+      "side": 1,
+      "message": "missing \u0026",
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de434541_c0bb103e",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-10-29T02:55:21Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29436bb8_e6b19183",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-10-29T02:55:21Z",
+      "side": 1,
+      "message": "remove tab spaces",
+      "range": {
+        "startLine": 311,
+        "startChar": 0,
+        "endLine": 322,
+        "endChar": 6
+      },
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
