@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e12b901f_a9ae11c5",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-11-01T22:36:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e253c68_31a25f54",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 15
+      },
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2397d4a3_e59a5cb5",
         "filename": "snmptrap/snmptrapd.sh",
         "patchSetId": 1
@@ -39,6 +63,24 @@
       "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f17aa69a_e6c7140e",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-11-01T22:36:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2397d4a3_e59a5cb5",
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     },
     {
       "key": {
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "86c7bab2_5997b409",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-11-01T22:36:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de434541_c0bb103e",
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "29436bb8_e6b19183",
         "filename": "snmptrap/snmptrapd.sh",
         "patchSetId": 1
@@ -70,6 +130,30 @@
       "writtenOn": "2021-10-29T02:55:21Z",
       "side": 1,
       "message": "remove tab spaces",
+      "range": {
+        "startLine": 311,
+        "startChar": 0,
+        "endLine": 322,
+        "endChar": 6
+      },
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f4cbdc2_501fdc13",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-11-01T22:36:41Z",
+      "side": 1,
+      "message": "This comment has not been addressed",
+      "parentUuid": "29436bb8_e6b19183",
       "range": {
         "startLine": 311,
         "startChar": 0,
