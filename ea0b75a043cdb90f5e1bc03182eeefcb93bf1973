@@ -163,6 +163,30 @@
       "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4a20115_da8a0265",
+        "filename": "snmptrap/snmptrapd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 93
+      },
+      "writtenOn": "2021-11-02T13:54:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9f4cbdc2_501fdc13",
+      "range": {
+        "startLine": 311,
+        "startChar": 0,
+        "endLine": 322,
+        "endChar": 6
+      },
+      "revId": "ea0b75a043cdb90f5e1bc03182eeefcb93bf1973",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
