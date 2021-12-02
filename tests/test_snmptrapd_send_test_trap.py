@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,32 +21,37 @@ from pysnmp import debug
 
 iters = range(0, 10, 1)
 for i in iters:
-    errorIndication, errorStatus, errorIndex, varbinds = next(sendNotification(SnmpEngine(),
-         CommunityData('not_public'),
-         UdpTransportTarget(('localhost', 6164)),
-         ContextData(),
-         'trap',
-         [ObjectType(ObjectIdentity('.1.3.6.1.4.1.999.1'), OctetString('test trap - ignore')),
-          ObjectType(ObjectIdentity('.1.3.6.1.4.1.999.2'), OctetString('ONAP pytest trap'))])
+    errorIndication, errorStatus, errorIndex, varbinds = next(
+        sendNotification(
+            SnmpEngine(),
+            CommunityData("not_public"),
+            UdpTransportTarget(("localhost", 6164)),
+            ContextData(),
+            "trap",
+            [
+                ObjectType(ObjectIdentity(".1.3.6.1.4.1.999.1"), OctetString("test trap - ignore")),
+                ObjectType(ObjectIdentity(".1.3.6.1.4.1.999.2"), OctetString("ONAP pytest trap")),
+            ],
+        )
     )
-    
+
     if errorIndication:
         print(errorIndication)
     else:
         print("successfully sent first trap example, number %d" % i)
 
 for i in iters:
-    errorIndication, errorStatus, errorIndex, varbinds = next(sendNotification(SnmpEngine(),
-         CommunityData('public'),
-         UdpTransportTarget(('localhost', 6164)),
-         ContextData(),
-         'trap',
-            NotificationType(
-                ObjectIdentity('.1.3.6.1.4.1.74.2.46.12.1.1')
-            ).addVarBinds(
-                ('.1.3.6.1.4.1.999.1', OctetString('ONAP pytest trap - ignore (varbind 1)')),
-                ('.1.3.6.1.4.1.999.2', OctetString('ONAP pytest trap - ignore (varbind 2)'))
-            )
+    errorIndication, errorStatus, errorIndex, varbinds = next(
+        sendNotification(
+            SnmpEngine(),
+            CommunityData("public"),
+            UdpTransportTarget(("localhost", 6164)),
+            ContextData(),
+            "trap",
+            NotificationType(ObjectIdentity(".1.3.6.1.4.1.74.2.46.12.1.1")).addVarBinds(
+                (".1.3.6.1.4.1.999.1", OctetString("ONAP pytest trap - ignore (varbind 1)")),
+                (".1.3.6.1.4.1.999.2", OctetString("ONAP pytest trap - ignore (varbind 2)")),
+            ),
         )
     )
 

@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2019-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ class test_trapd_io(unittest.TestCase):
     """
     Test the save_pid mod
     """
-    tds.c_config = json.loads("{ \"snmptrapd\": { \"version\": \"1.4.0\", \"title\": \"ONAP SNMP Trap Receiver\" }, \"protocols\": { \"transport\": \"udp\", \"ipv4_interface\": \"0.0.0.0\", \"ipv4_port\": 6162, \"ipv6_interface\": \"::1\", \"ipv6_port\": 6162 }, \"cache\": { \"dns_cache_ttl_seconds\": 60 }, \"publisher\": { \"http_timeout_milliseconds\": 1500, \"http_retries\": 3, \"http_milliseconds_between_retries\": 750, \"http_primary_publisher\": \"true\", \"http_peer_publisher\": \"unavailable\", \"max_traps_between_publishes\": 10, \"max_milliseconds_between_publishes\": 10000 }, \"streams_publishes\": { \"sec_fault_unsecure\": { \"type\": \"message_router\", \"aaf_password\": null, \"dmaap_info\": { \"location\": \"mtl5\", \"client_id\": null, \"client_role\": null, \"topic_url\": \"http://localhost:3904/events/ONAP-COLLECTOR-SNMPTRAP\" }, \"aaf_username\": null } }, \"files\": { \"runtime_base_dir\": \"/tmp/opt/app/snmptrap\", \"log_dir\": \"logs\", \"data_dir\": \"data\", \"pid_dir\": \"tmp\", \"arriving_traps_log\": \"snmptrapd_arriving_traps.log\", \"snmptrapd_diag\": \"snmptrapd_prog_diag.log\", \"traps_stats_log\": \"snmptrapd_stats.csv\", \"perm_status_file\": \"snmptrapd_status.log\", \"eelf_base_dir\": \"/tmp/opt/app/snmptrap/logs\", \"eelf_error\": \"error.log\", \"eelf_debug\": \"debug.log\", \"eelf_audit\": \"audit.log\", \"eelf_metrics\": \"metrics.log\", \"roll_frequency\": \"day\", \"minimum_severity_to_log\": 2 }, \"trap_config\": { \"sw_interval_in_seconds\": 60, \"notify_oids\": { \".1.3.6.1.4.1.9.0.1\": { \"sw_high_water_in_interval\": 102, \"sw_low_water_in_interval\": 7, \"category\": \"logonly\" }, \".1.3.6.1.4.1.9.0.2\": { \"sw_high_water_in_interval\": 101, \"sw_low_water_in_interval\": 7, \"category\": \"logonly\" }, \".1.3.6.1.4.1.9.0.3\": { \"sw_high_water_in_interval\": 102, \"sw_low_water_in_interval\": 7, \"category\": \"logonly\" }, \".1.3.6.1.4.1.9.0.4\": { \"sw_high_water_in_interval\": 10, \"sw_low_water_in_interval\": 3, \"category\": \"logonly\" } } }, \"snmpv3_config\": { \"usm_users\": [ { \"user\": \"usr-sha-aes256\", \"engineId\": \"8000000001020304\", \"usmHMACSHAAuth\": \"authkey1\", \"usmAesCfb256\": \"privkey1\" }, { \"user\": \"user1\", \"engineId\": \"8000000000000001\", \"usmHMACMD5Auth\": \"authkey1\", \"usmDESPriv\": \"privkey1\" }, { \"user\": \"user2\", \"engineId\": \"8000000000000002\", \"usmHMACSHAAuth\": \"authkey2\", \"usmAesCfb128\": \"privkey2\" }, { \"user\": \"user3\", \"engineId\": \"8000000000000003\", \"usmHMACSHAAuth\": \"authkey3\", \"usmAesCfb256\": \"privkey3\" } ] } }")
 
+    tds.c_config = json.loads(
+        '{ "snmptrapd": { "version": "1.4.0", "title": "ONAP SNMP Trap Receiver" }, "protocols": { "transport": "udp", "ipv4_interface": "0.0.0.0", "ipv4_port": 6162, "ipv6_interface": "::1", "ipv6_port": 6162 }, "cache": { "dns_cache_ttl_seconds": 60 }, "publisher": { "http_timeout_milliseconds": 1500, "http_retries": 3, "http_milliseconds_between_retries": 750, "http_primary_publisher": "true", "http_peer_publisher": "unavailable", "max_traps_between_publishes": 10, "max_milliseconds_between_publishes": 10000 }, "streams_publishes": { "sec_fault_unsecure": { "type": "message_router", "aaf_password": null, "dmaap_info": { "location": "mtl5", "client_id": null, "client_role": null, "topic_url": "http://localhost:3904/events/ONAP-COLLECTOR-SNMPTRAP" }, "aaf_username": null } }, "files": { "runtime_base_dir": "/tmp/opt/app/snmptrap", "log_dir": "logs", "data_dir": "data", "pid_dir": "tmp", "arriving_traps_log": "snmptrapd_arriving_traps.log", "snmptrapd_diag": "snmptrapd_prog_diag.log", "traps_stats_log": "snmptrapd_stats.csv", "perm_status_file": "snmptrapd_status.log", "eelf_base_dir": "/tmp/opt/app/snmptrap/logs", "eelf_error": "error.log", "eelf_debug": "debug.log", "eelf_audit": "audit.log", "eelf_metrics": "metrics.log", "roll_frequency": "day", "minimum_severity_to_log": 2 }, "trap_config": { "sw_interval_in_seconds": 60, "notify_oids": { ".1.3.6.1.4.1.9.0.1": { "sw_high_water_in_interval": 102, "sw_low_water_in_interval": 7, "category": "logonly" }, ".1.3.6.1.4.1.9.0.2": { "sw_high_water_in_interval": 101, "sw_low_water_in_interval": 7, "category": "logonly" }, ".1.3.6.1.4.1.9.0.3": { "sw_high_water_in_interval": 102, "sw_low_water_in_interval": 7, "category": "logonly" }, ".1.3.6.1.4.1.9.0.4": { "sw_high_water_in_interval": 10, "sw_low_water_in_interval": 3, "category": "logonly" } } }, "snmpv3_config": { "usm_users": [ { "user": "usr-sha-aes256", "engineId": "8000000001020304", "usmHMACSHAAuth": "authkey1", "usmAesCfb256": "privkey1" }, { "user": "user1", "engineId": "8000000000000001", "usmHMACMD5Auth": "authkey1", "usmDESPriv": "privkey1" }, { "user": "user2", "engineId": "8000000000000002", "usmHMACSHAAuth": "authkey2", "usmAesCfb128": "privkey2" }, { "user": "user3", "engineId": "8000000000000003", "usmHMACSHAAuth": "authkey3", "usmAesCfb256": "privkey3" } ] } }'
+    )
 
     def test_roll_all_files_notopen(self):
         """
@@ -48,9 +50,9 @@ class test_trapd_io(unittest.TestCase):
         """
         Test bad error file location
         """
-    
+
         # open eelf error logs
-        tds.c_config['files.eelf_error']="/bad_dir/error.log"
+        tds.c_config["files.eelf_error"] = "/bad_dir/error.log"
 
         # try to open file in non-existent dir
         with pytest.raises(SystemExit) as pytest_wrapped_exception:
@@ -61,9 +63,9 @@ class test_trapd_io(unittest.TestCase):
         """
         Test bad debug file location
         """
-    
+
         # open eelf debug logs
-        tds.c_config['files.eelf_debug']="/bad_dir/debug.log"
+        tds.c_config["files.eelf_debug"] = "/bad_dir/debug.log"
 
         # try to open file in non-existent dir
         with pytest.raises(SystemExit) as pytest_wrapped_exception:
@@ -74,9 +76,9 @@ class test_trapd_io(unittest.TestCase):
         """
         Test bad audit file location
         """
-    
+
         # open eelf debug logs
-        tds.c_config['files.eelf_audit']="/bad_dir/audit.log"
+        tds.c_config["files.eelf_audit"] = "/bad_dir/audit.log"
 
         # try to open file in non-existent dir
         with pytest.raises(SystemExit) as pytest_wrapped_exception:
@@ -87,9 +89,9 @@ class test_trapd_io(unittest.TestCase):
         """
         Test bad metrics file location
         """
-    
+
         # open eelf debug logs
-        tds.c_config['files.eelf_metrics']="/bad_dir/metrics.log"
+        tds.c_config["files.eelf_metrics"] = "/bad_dir/metrics.log"
 
         # try to open file in non-existent dir
         with pytest.raises(SystemExit) as pytest_wrapped_exception:
@@ -100,7 +102,7 @@ class test_trapd_io(unittest.TestCase):
         """
         Test roll of logs when not open
         """
-    
+
         # try to roll logs when not open
         with pytest.raises(SystemExit) as pytest_wrapped_exception:
             result = trapd_io.roll_all_logs()
@@ -110,7 +112,7 @@ class test_trapd_io(unittest.TestCase):
         """
         Test roll of individual file when not present
         """
-    
+
         # try to roll logs when not open
         result = trapd_io.roll_file("/file/not/present")
         self.assertEqual(result, False)
@@ -119,22 +121,22 @@ class test_trapd_io(unittest.TestCase):
         """
         try to roll logs when not enough perms
         """
-    
-        no_perms_dir="/tmp/opt/app/snmptrap/no_perms"
-        no_perms_file="test.dat"
-        no_perms_fp= no_perms_dir + "/" + no_perms_file
+
+        no_perms_dir = "/tmp/opt/app/snmptrap/no_perms"
+        no_perms_file = "test.dat"
+        no_perms_fp = no_perms_dir + "/" + no_perms_file
 
         # required directory tree
         try:
             Path(no_perms_dir).mkdir(parents=True, exist_ok=True)
-            os.chmod(no_perms_dir,0o777)
+            os.chmod(no_perms_dir, 0o777)
         except Exception as e:
             print("Error while running %s : %s" % (os.path.basename(__file__), str(e.strerror)))
             sys.exit(1)
 
         # create empty file
-        open(no_perms_fp,'a').close()
-        os.chmod(no_perms_dir,0o444)
+        open(no_perms_fp, "a").close()
+        os.chmod(no_perms_dir, 0o444)
 
         result = trapd_io.roll_file(no_perms_fp)
         self.assertEqual(result, False)
@@ -144,7 +146,6 @@ class test_trapd_io(unittest.TestCase):
             result = trapd_io.open_file(no_perms_fp)
             assert pytest_wrapped_exception.type == SystemExit
 
-
     def test_open_file_exists(self):
         """
         Test file open in directory present
@@ -152,7 +153,7 @@ class test_trapd_io(unittest.TestCase):
 
         # create copy of snmptrapd.json for pytest
         test_file = "/tmp/snmptrap_pytest"
-    
+
         # try to roll logs when not open
         result = trapd_io.open_file(test_file)
         compare = str(result).startswith("<_io.TextIOWrapper name=")
@@ -165,7 +166,7 @@ class test_trapd_io(unittest.TestCase):
 
         # create copy of snmptrapd.json for pytest
         test_file = "/tmp/no_such_dir/snmptrap_pytest"
-    
+
         # try to open file when dir not present
         with pytest.raises(SystemExit) as pytest_wrapped_exception:
             result = trapd_io.open_file(test_file)
@@ -179,14 +180,14 @@ class test_trapd_io(unittest.TestCase):
         # create copy of snmptrapd.json for pytest
         test_file_name = "/tmp/snmptrap_pytest"
         test_file = trapd_io.open_file(test_file_name)
-    
+
         # close active file
         result = trapd_io.close_file(test_file, test_file_name)
         self.assertEqual(result, True)
 
     def test_close_file_does_not_exists(self):
         """
-        Test closing non-existent file 
+        Test closing non-existent file
         """
 
         # try to roll logs when not open
@@ -194,5 +195,5 @@ class test_trapd_io(unittest.TestCase):
         self.assertEqual(result, False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

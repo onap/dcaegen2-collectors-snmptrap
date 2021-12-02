@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ is published to a dmaap instance that has been defined by controller.
     onap dcae snmp trap publish dmaap
 """
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 # basics
 import argparse
@@ -57,6 +57,7 @@ import uuid as uuid_mod
 # pysnmp
 from pysnmp.entity import engine, config
 from pysnmp.carrier.asyncio.dgram import udp, udp6
+
 # from pysnmp.carrier.asyncore.dgram import udp
 from pysnmp.entity.rfc3413 import ntfrcv
 from pysnmp.proto.api import v2c
@@ -68,12 +69,10 @@ import trapd_settings as tds
 from trapd_runtime_pid import save_pid, rm_pid
 from trapd_get_cbs_config import get_cbs_config
 from trapd_exit import cleanup_and_exit
-from trapd_http_session import init_session_obj, close_session_obj,\
-                               reset_session_obj
+from trapd_http_session import init_session_obj, close_session_obj, reset_session_obj
 from trapd_snmpv3 import load_snmpv3_credentials
 from trapd_vb_types import pysnmp_to_netsnmp_varbind_convert
-from trapd_io import roll_all_logs, open_eelf_logs, roll_file, open_file,\
-                     close_file, ecomp_logger, stdout_logger
+from trapd_io import roll_all_logs, open_eelf_logs, roll_file, open_file, close_file, ecomp_logger, stdout_logger
 
 import trapd_stormwatch_settings as sws
 import trapd_stormwatch as stormwatch
@@ -99,8 +98,8 @@ def usage_err():
        usage args
     """
 
-    print('Incorrect usage invoked.  Correct usage:')
-    print('  %s [-v]' % prog_name)
+    print("Incorrect usage invoked.  Correct usage:")
+    print("  %s [-v]" % prog_name)
     cleanup_and_exit(1, "undefined")
 
 
@@ -127,10 +126,8 @@ def load_all_configs(_signum, _frame):
     """
 
     if int(_signum) != 0:
-        msg = ("received signal %s at frame %s; re-reading configs"
-               % (_signum, _frame))
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+        msg = "received signal %s at frame %s; re-reading configs" % (_signum, _frame)
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
     # re-request config from broker:
     if not get_cbs_config():
@@ -138,19 +135,14 @@ def load_all_configs(_signum, _frame):
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
     else:
-        current_runtime_config_file_name = (
-            tds.c_config['files']['runtime_base_dir'] +
-            "/tmp/current_config.json")
+        current_runtime_config_file_name = tds.c_config["files"]["runtime_base_dir"] + "/tmp/current_config.json"
         if int(_signum) != 0:
-            msg = "updated config logged to : %s" % \
-                   current_runtime_config_file_name
+            msg = "updated config logged to : %s" % current_runtime_config_file_name
         else:
-            msg = "current config logged to : %s" % \
-                   current_runtime_config_file_name
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL,
-                     msg)
+            msg = "current config logged to : %s" % current_runtime_config_file_name
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
-    with open(current_runtime_config_file_name, 'w') as outfile:
+    with open(current_runtime_config_file_name, "w") as outfile:
         json.dump(tds.c_config, outfile)
 
     # reset http session based on latest config
@@ -158,10 +150,8 @@ def load_all_configs(_signum, _frame):
 
     # reload sw participating entries, reset counter dictionary
     traps_configured = stormwatch.sw_load_trap_config(tds.c_config)
-    msg = "encountered %d trap configurations in CBS/json config" % \
-          traps_configured
-    ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL,
-                 msg)
+    msg = "encountered %d trap configurations in CBS/json config" % traps_configured
+    ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
     tds.last_minute = datetime.datetime.now().minute
     tds.last_hour = datetime.datetime.now().hour
@@ -178,33 +168,32 @@ def resolve_ip(_loc_ip_addr_str):
 
     try:
         if int(tds.dns_cache_ip_expires[_loc_ip_addr_str] < int(time.time())):
-            raise Exception('cache expired for %s at %d - updating value' %
-                            (_loc_ip_addr_str,
-                             (tds.dns_cache_ip_expires[_loc_ip_addr_str])))
+            raise Exception(
+                "cache expired for %s at %d - updating value"
+                % (_loc_ip_addr_str, (tds.dns_cache_ip_expires[_loc_ip_addr_str]))
+            )
         else:
             agent_fqdn = tds.dns_cache_ip_to_name[_loc_ip_addr_str]
 
     except Exception as e:
-        msg = "dns cache expired or missing for %s - refreshing" % \
-              _loc_ip_addr_str
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+        msg = "dns cache expired or missing for %s - refreshing" % _loc_ip_addr_str
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         try:
-            agent_fqdn, alias, addresslist = socket.gethostbyaddr(
-                _loc_ip_addr_str)
+            agent_fqdn, alias, addresslist = socket.gethostbyaddr(_loc_ip_addr_str)
         except Exception as e:
             agent_fqdn = _loc_ip_addr_str
 
         tds.dns_cache_ip_to_name[_loc_ip_addr_str] = agent_fqdn
-        tds.dns_cache_ip_expires[_loc_ip_addr_str] = (
-            time.time() + int(tds.c_config['cache']['dns_cache_ttl_seconds']))
-        msg = "cache for %s (%s) updated - set to expire at %d" % \
-            (agent_fqdn, _loc_ip_addr_str,
-             tds.dns_cache_ip_expires[_loc_ip_addr_str])
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+        tds.dns_cache_ip_expires[_loc_ip_addr_str] = time.time() + int(tds.c_config["cache"]["dns_cache_ttl_seconds"])
+        msg = "cache for %s (%s) updated - set to expire at %d" % (
+            agent_fqdn,
+            _loc_ip_addr_str,
+            tds.dns_cache_ip_expires[_loc_ip_addr_str],
+        )
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
     return agent_fqdn
+
 
 # # # # # # # # # # # # #
 # fx: log_all_arriving_traps
@@ -214,12 +203,12 @@ def resolve_ip(_loc_ip_addr_str):
 def log_all_arriving_traps():
 
     # roll logs as needed/defined in files.roll_frequency
-    if tds.c_config['files']['roll_frequency'] == "minute":
+    if tds.c_config["files"]["roll_frequency"] == "minute":
         curr_minute = datetime.datetime.now().minute
         if curr_minute != tds.last_minute:
             roll_all_logs()
             tds.last_minute = curr_minute
-    elif tds.c_config['files']['roll_frequency'] == "hour":
+    elif tds.c_config["files"]["roll_frequency"] == "hour":
         curr_hour = datetime.datetime.now().hour
         if curr_hour != tds.last_hour:
             roll_all_logs()
@@ -233,28 +222,35 @@ def log_all_arriving_traps():
 
     # always log arriving trap
     try:
-        time_now=int(round(time.time(),0))
-        arrived_epoch_time_int=int(tds.trap_dict["time received"])
-        tds.arriving_traps_fd.write('%d %s; %s %s %s %s %s %s %s %s %s %s %s %s %s\n' %
-                                     (time_now,
-                                     datetime.datetime.fromtimestamp(time_now).strftime("%a %b %d %H:%M:%S %Y"),
-                                     tds.trap_dict["time received"],
-                                     datetime.datetime.fromtimestamp(arrived_epoch_time_int).strftime("%a %b %d %H:%M:%S %Y"),
-                                     tds.trap_dict["trap category"],
-                                     tds.trap_dict["epoch_serno"],
-                                     tds.trap_dict["notify OID"],
-                                     tds.trap_dict["agent name"],
-                                     tds.trap_dict["agent address"],
-                                     tds.trap_dict["pdu agent name"],
-                                     tds.trap_dict["pdu agent address"],
-                                     tds.trap_dict["cambria.partition"],
-                                     tds.trap_dict["protocol version"],
-                                     tds.trap_dict["uuid"],
-                                     tds.all_vb_str))
+        time_now = int(round(time.time(), 0))
+        arrived_epoch_time_int = int(tds.trap_dict["time received"])
+        tds.arriving_traps_fd.write(
+            "%d %s; %s %s %s %s %s %s %s %s %s %s %s %s %s\n"
+            % (
+                time_now,
+                datetime.datetime.fromtimestamp(time_now).strftime("%a %b %d %H:%M:%S %Y"),
+                tds.trap_dict["time received"],
+                datetime.datetime.fromtimestamp(arrived_epoch_time_int).strftime("%a %b %d %H:%M:%S %Y"),
+                tds.trap_dict["trap category"],
+                tds.trap_dict["epoch_serno"],
+                tds.trap_dict["notify OID"],
+                tds.trap_dict["agent name"],
+                tds.trap_dict["agent address"],
+                tds.trap_dict["pdu agent name"],
+                tds.trap_dict["pdu agent address"],
+                tds.trap_dict["cambria.partition"],
+                tds.trap_dict["protocol version"],
+                tds.trap_dict["uuid"],
+                tds.all_vb_str,
+            )
+        )
 
     except Exception as e:
         msg = "Error writing to %s : %s - arriving trap %s NOT LOGGED" % (
-            tds.arriving_traps_filename, str(e), tds.trap_dict["uuid"])
+            tds.arriving_traps_filename,
+            str(e),
+            tds.trap_dict["uuid"],
+        )
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_ERROR, tds.CODE_GENERAL, msg)
 
 
@@ -272,14 +268,11 @@ def log_published_messages(_post_data_enclosed):
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
     try:
-        tds.json_traps_fd.write('%s\n' % _post_data_enclosed)
-        msg = "successfully logged json for %s to %s" % (
-            tds.trap_dict["uuid"], tds.json_traps_filename)
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+        tds.json_traps_fd.write("%s\n" % _post_data_enclosed)
+        msg = "successfully logged json for %s to %s" % (tds.trap_dict["uuid"], tds.json_traps_filename)
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
     except Exception as e:
-        msg = "Error writing to %s : %s - trap %s NOT LOGGED" % (
-            tds.json_traps_filename, str(e), tds.trap_dict["uuid"])
+        msg = "Error writing to %s : %s - trap %s NOT LOGGED" % (tds.json_traps_filename, str(e), tds.trap_dict["uuid"])
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_ERROR, tds.CODE_GENERAL, msg)
 
 
@@ -303,8 +296,7 @@ def post_dmaap():
 
     if tds.http_requ_session is None:
         msg = "tds.http_requ_session is None - getting new (%s)" % tds.http_requ_session
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         tds.http_requ_session = init_session_obj()
 
     # if only 1 trap, ship as-is
@@ -312,7 +304,7 @@ def post_dmaap():
         post_data_enclosed = tds.all_traps_json_str
     else:
         # otherwise, add brackets around package
-        post_data_enclosed = '[' + tds.all_traps_json_str + ']'
+        post_data_enclosed = "[" + tds.all_traps_json_str + "]"
 
     msg = "post_data_enclosed: %s" % (post_data_enclosed)
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
@@ -320,68 +312,91 @@ def post_dmaap():
     k = 0
     dmaap_pub_success = False
 
-    while not dmaap_pub_success and k < (int(tds.c_config['publisher']['http_retries'])):
+    while not dmaap_pub_success and k < (int(tds.c_config["publisher"]["http_retries"])):
         try:
-            if tds.c_config['streams_publishes']['sec_fault_unsecure']['aaf_username'] == "" or tds.c_config['streams_publishes']['sec_fault_unsecure']['aaf_username'] is None:
+            if (
+                tds.c_config["streams_publishes"]["sec_fault_unsecure"]["aaf_username"] == ""
+                or tds.c_config["streams_publishes"]["sec_fault_unsecure"]["aaf_username"] is None
+            ):
                 msg = "%d trap(s) : %s - attempt %d (unsecure)" % (
-                    tds.traps_since_last_publish, tds.trap_uuids_in_buffer, k)
-                ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                             tds.CODE_GENERAL, msg)
-                http_resp = tds.http_requ_session.post(tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'], post_data_enclosed,
-                                                       headers=http_headers,
-                                                       timeout=tds.timeout_seconds)
+                    tds.traps_since_last_publish,
+                    tds.trap_uuids_in_buffer,
+                    k,
+                )
+                ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+                http_resp = tds.http_requ_session.post(
+                    tds.c_config["streams_publishes"]["sec_fault_unsecure"]["dmaap_info"]["topic_url"],
+                    post_data_enclosed,
+                    headers=http_headers,
+                    timeout=tds.timeout_seconds,
+                )
             else:
                 msg = "%d trap(s) : %s - attempt %d (secure)" % (
-                    tds.traps_since_last_publish, tds.trap_uuids_in_buffer, k)
-                ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                             tds.CODE_GENERAL, msg)
-                http_resp = tds.http_requ_session.post(tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'], post_data_enclosed,
-                                                       auth=(tds.c_config['streams_publishes']['sec_fault_unsecure']['aaf_username'],
-                                                             tds.c_config['streams_publishes']['sec_fault_unsecure']['aaf_password']),
-                                                       headers=http_headers,
-                                                       timeout=tds.timeout_seconds)
+                    tds.traps_since_last_publish,
+                    tds.trap_uuids_in_buffer,
+                    k,
+                )
+                ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+                http_resp = tds.http_requ_session.post(
+                    tds.c_config["streams_publishes"]["sec_fault_unsecure"]["dmaap_info"]["topic_url"],
+                    post_data_enclosed,
+                    auth=(
+                        tds.c_config["streams_publishes"]["sec_fault_unsecure"]["aaf_username"],
+                        tds.c_config["streams_publishes"]["sec_fault_unsecure"]["aaf_password"],
+                    ),
+                    headers=http_headers,
+                    timeout=tds.timeout_seconds,
+                )
 
             if http_resp.status_code == requests.codes.ok:
-                msg = "%d trap(s) successfully published: %s" % (
-                    tds.traps_since_last_publish, tds.trap_uuids_in_buffer)
-                ecomp_logger(tds.LOG_TYPE_METRICS, tds.SEV_INFO,
-                             tds.CODE_GENERAL, msg)
+                msg = "%d trap(s) successfully published: %s" % (tds.traps_since_last_publish, tds.trap_uuids_in_buffer)
+                ecomp_logger(tds.LOG_TYPE_METRICS, tds.SEV_INFO, tds.CODE_GENERAL, msg)
                 log_published_messages(post_data_enclosed)
                 tds.last_pub_time = time.time()
                 dmaap_pub_success = True
                 break
             else:
                 msg = "Trap(s) %s publish attempt %d returned non-normal: %d %s" % (
-                    tds.trap_uuids_in_buffer, k, http_resp.status_code, http_resp.text)
-                ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN,
-                             tds.CODE_GENERAL, msg)
+                    tds.trap_uuids_in_buffer,
+                    k,
+                    http_resp.status_code,
+                    http_resp.text,
+                )
+                ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
 
         except OSError as e:
             msg = "OS exception while attempting to post %s attempt %d: (%s) %s %s" % (
-                tds.trap_uuids_in_buffer, k,  e.errno, e.strerror, str(e))
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN,
-                         tds.CODE_GENERAL, msg)
+                tds.trap_uuids_in_buffer,
+                k,
+                e.errno,
+                e.strerror,
+                str(e),
+            )
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
 
         except requests.exceptions.RequestException as e:
             msg = "Requests exception while attempting to post %s attempt %d: (%d) %s" % (
-                tds.trap_uuids_in_buffer, int(k),  int(e.errno), str(e.strerror))
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN,
-                         tds.CODE_GENERAL, msg)
+                tds.trap_uuids_in_buffer,
+                int(k),
+                int(e.errno),
+                str(e.strerror),
+            )
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
 
         k += 1
 
-        if k < int(tds.c_config['publisher']['http_retries']):
-            msg = "sleeping %.4f seconds and retrying" % (
-                tds.seconds_between_retries)
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN,
-                         tds.CODE_GENERAL, msg)
+        if k < int(tds.c_config["publisher"]["http_retries"]):
+            msg = "sleeping %.4f seconds and retrying" % (tds.seconds_between_retries)
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
             time.sleep(tds.seconds_between_retries)
         else:
             break
 
     if not dmaap_pub_success:
-        msg = "ALL publish attempts failed for traps %s to URL %s "\
-            % (tds.trap_uuids_in_buffer, tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'])
+        msg = "ALL publish attempts failed for traps %s to URL %s " % (
+            tds.trap_uuids_in_buffer,
+            tds.c_config["streams_publishes"]["sec_fault_unsecure"]["dmaap_info"]["topic_url"],
+        )
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_ERROR, tds.CODE_GENERAL, msg)
 
     # FMDL: This currently tries, then logs error and trashes buffer if all dmaap attempts fail. Better way?
@@ -389,6 +404,7 @@ def post_dmaap():
     tds.trap_uuids_in_buffer = ""
     tds.all_traps_json_str = ""
     tds.first_trap = True
+
 
 # # # # # # # # # # # # # # # # # # #
 # fx: request_observer for community string rewrite
@@ -398,8 +414,9 @@ def post_dmaap():
 def comm_string_rewrite_observer(snmpEngine, execpoint, variables, cbCtx):
 
     # match ALL community strings
-    if re.match('.*', str(variables['communityName'])):
-        variables['communityName'] = variables['communityName'].clone('public')
+    if re.match(".*", str(variables["communityName"])):
+        variables["communityName"] = variables["communityName"].clone("public")
+
 
 # # # # # # # # # # # # # # # # # # #
 # fx: snmp_engine_observer_cb
@@ -457,21 +474,20 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
     else:
         tds.traps_in_epoch = 0
     tds.last_epoch_second = epoch_second
-    traps_in_epoch_04d = format(tds.traps_in_epoch, '04d')
-    tds.trap_dict['epoch_arrived'] = epoch_second
-    tds.trap_dict['epoch_serno'] = int(
-        (str(epoch_second) + str(traps_in_epoch_04d)))
+    traps_in_epoch_04d = format(tds.traps_in_epoch, "04d")
+    tds.trap_dict["epoch_arrived"] = epoch_second
+    tds.trap_dict["epoch_serno"] = int((str(epoch_second) + str(traps_in_epoch_04d)))
 
     # assign uuid to trap
     tds.trap_dict["uuid"] = str(uuid_mod.uuid1())
 
     # ip and hostname
-    ip_addr_str = str(variables['transportAddress'][0])
-    # set agent address and name to source of packet, OVERWRITE if 
+    ip_addr_str = str(variables["transportAddress"][0])
+    # set agent address and name to source of packet, OVERWRITE if
     # .1.3.6.1.6.3.18.1.3.0 varbind encountered later in trap processing
     tds.trap_dict["agent address"] = ip_addr_str
     tds.trap_dict["agent name"] = resolve_ip(ip_addr_str)
-    # set overridden/logical address and name to source of packet so we know 
+    # set overridden/logical address and name to source of packet so we know
     # original value if .1.3.6.1.6.3.18.1.3.0 shows up
     # NOTE:  This does NOT change ever, label may change to
     #        "overridden agent..." in the future for truth in nameing
@@ -479,17 +495,15 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
     tds.trap_dict["pdu agent name"] = tds.trap_dict["agent name"]
 
     # log arrival now that we have agent addr
-    msg = 'trap from %s %s, assigned uuid: %s' % \
-        (ip_addr_str, tds.trap_dict["agent name"], tds.trap_dict["uuid"])
+    msg = "trap from %s %s, assigned uuid: %s" % (ip_addr_str, tds.trap_dict["agent name"], tds.trap_dict["uuid"])
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
-
 
     tds.trap_dict["cambria.partition"] = str(tds.trap_dict["agent name"])
     # do not include cleartext community in pub
     tds.trap_dict["community"] = ""
     tds.trap_dict["community len"] = 0
 
-    snmp_version = variables['securityModel']
+    snmp_version = variables["securityModel"]
     if snmp_version == 1:
         tds.trap_dict["protocol version"] = "v1"
         # enterprise = variables['pdu']['enterprise'].prettyPrint()
@@ -517,15 +531,18 @@ def snmp_engine_observer_cb(snmp_engine, execpoint, variables, cbCtx):
                 tds.trap_dict["protocol version"] = "unknown"
 
     # tds.trap_dict['time received'] = epoch_msecond
-    tds.trap_dict['time received'] = epoch_second
-    tds.trap_dict['trap category'] = (
-        tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url']).split('/')[-1]
+    tds.trap_dict["time received"] = epoch_second
+    tds.trap_dict["trap category"] = (
+        tds.c_config["streams_publishes"]["sec_fault_unsecure"]["dmaap_info"]["topic_url"]
+    ).split("/")[-1]
 
     return True
+
 
 # # # # # # # # # # # # # # # # # # #
 # fx: request_observer for community string rewrite
 # # # # # # # # # # # # # # # # # # #
+
 
 def add_varbind_to_log_string(vb_idx, vb_oid, vb_type, vb_val):
     """
@@ -548,10 +565,11 @@ def add_varbind_to_log_string(vb_idx, vb_oid, vb_type, vb_val):
     """
 
     if vb_idx == 0:
-        tds.all_vb_str = 'varbinds:'
+        tds.all_vb_str = "varbinds:"
 
-    tds.all_vb_str = tds.all_vb_str + " [" + str(vb_idx) + "] " \
-                     + str(vb_oid) + " {" + vb_type + "} " + str(vb_val.prettyPrint())
+    tds.all_vb_str = (
+        tds.all_vb_str + " [" + str(vb_idx) + "] " + str(vb_oid) + " {" + vb_type + "} " + str(vb_val.prettyPrint())
+    )
 
     # try:
     #     tds.all_vb_str = tds.all_vb_str + " [" + str(vb_idx) + "] " + vb_oid + " {" + vb_type + "} " + vb_val
@@ -561,6 +579,7 @@ def add_varbind_to_log_string(vb_idx, vb_oid, vb_type, vb_val):
     #     stdout_logger(msg)
     #     ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
     #     return 1
+
 
 def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
     """
@@ -595,8 +614,7 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
     # if second varbind, use as notifyOID for all snmp versions
     if vb_idx == 1:
         tds.trap_dict["notify OID"] = "." + _vb_value
-        tds.trap_dict["notify OID len"] = tds.trap_dict["notify OID"].count(
-            '.')
+        tds.trap_dict["notify OID len"] = tds.trap_dict["notify OID"].count(".")
         return 0
 
     # if override varbind OID, use value as agent address
@@ -614,15 +632,15 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
             return 0
 
     if tds.first_varbind:
-        tds.all_vb_json_str = ', \"varbinds\": ['
+        tds.all_vb_json_str = ', "varbinds": ['
         tds.first_varbind = False
     else:
         tds.all_vb_json_str = tds.all_vb_json_str + " ,"
 
     _individual_vb_dict.clear()
-    _individual_vb_dict['varbind_oid'] = _vb_oid
-    _individual_vb_dict['varbind_type'] = _vb_type
-    _individual_vb_dict['varbind_value'] = _vb_value
+    _individual_vb_dict["varbind_oid"] = _vb_oid
+    _individual_vb_dict["varbind_type"] = _vb_type
+    _individual_vb_dict["varbind_value"] = _vb_value
 
     _individual_vb_json_str = json.dumps(_individual_vb_dict)
 
@@ -632,8 +650,7 @@ def add_varbind_to_json(vb_idx, vb_oid, vb_type, vb_val):
 
 # Callback function for receiving notifications
 # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
-def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
-                      varBinds, cbCtx):
+def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName, varBinds, cbCtx):
     """
     Callback executed when trap arrives
     :Parameters:
@@ -673,10 +690,8 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
 
     # iterate over varbinds, add to json struct
     for vb_oid, vb_val in varBinds:
-        log_ret = add_varbind_to_log_string(
-            pdu_varbind_count, vb_oid, vb_val.__class__.__name__, vb_val)
-        varbinds_added = add_varbind_to_json(
-            pdu_varbind_count, vb_oid, vb_val.__class__.__name__, vb_val)
+        log_ret = add_varbind_to_log_string(pdu_varbind_count, vb_oid, vb_val.__class__.__name__, vb_val)
+        varbinds_added = add_varbind_to_json(pdu_varbind_count, vb_oid, vb_val.__class__.__name__, vb_val)
         payload_varbinds += varbinds_added
         pdu_varbind_count += 1
 
@@ -686,7 +701,7 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
     # if varbinds present - which will almost always be the case - add all_vb_json_str to trap_json_message
     if payload_varbinds != 0:
         # close out vb array
-        tds.all_vb_json_str = tds.all_vb_json_str + ']'
+        tds.all_vb_json_str = tds.all_vb_json_str + "]"
 
         # remove last close bracket from curr_trap_json_str
         curr_trap_json_str = curr_trap_json_str[:-1]
@@ -695,7 +710,7 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
         curr_trap_json_str = curr_trap_json_str + tds.all_vb_json_str
 
         # add last close brace back in
-        curr_trap_json_str = curr_trap_json_str + '}'
+        curr_trap_json_str = curr_trap_json_str + "}"
 
     msg = "trap %s : %s" % (tds.trap_dict["uuid"], curr_trap_json_str)
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
@@ -710,38 +725,41 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
     # only add to publish buffer if stormwatch is NOT active
     if stormwatch.sw_storm_active(tds.trap_dict["agent address"], tds.trap_dict["notify OID"]):
         msg = "stormwatch active - deflecting notification %s from %s" % (
-            tds.trap_dict["notify OID"], tds.trap_dict["agent address"])
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+            tds.trap_dict["notify OID"],
+            tds.trap_dict["agent address"],
+        )
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
     else:
         msg = "adding %s to buffer" % (tds.trap_dict["uuid"])
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         if tds.first_trap:
             tds.all_traps_json_str = curr_trap_json_str
             tds.trap_uuids_in_buffer = tds.trap_dict["uuid"]
             tds.first_trap = False
         else:
-            tds.trap_uuids_in_buffer = tds.trap_uuids_in_buffer + \
-                ', ' + tds.trap_dict["uuid"]
-            tds.all_traps_json_str = tds.all_traps_json_str + ', ' + curr_trap_json_str
+            tds.trap_uuids_in_buffer = tds.trap_uuids_in_buffer + ", " + tds.trap_dict["uuid"]
+            tds.all_traps_json_str = tds.all_traps_json_str + ", " + curr_trap_json_str
 
-    if tds.traps_since_last_publish >= int(tds.c_config['publisher']['max_traps_between_publishes']):
+    if tds.traps_since_last_publish >= int(tds.c_config["publisher"]["max_traps_between_publishes"]):
         msg = "num traps since last publish (%d) exceeds threshold (%d) - publish traps" % (
-            tds.traps_since_last_publish, int(tds.c_config['publisher']['max_traps_between_publishes']))
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+            tds.traps_since_last_publish,
+            int(tds.c_config["publisher"]["max_traps_between_publishes"]),
+        )
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         post_dmaap()
-    elif milliseconds_since_last_publish >= int(tds.c_config['publisher']['max_milliseconds_between_publishes']):
-        msg = "num milliseconds since last publish (%.0f) exceeds threshold - publish traps" % milliseconds_since_last_publish
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+    elif milliseconds_since_last_publish >= int(tds.c_config["publisher"]["max_milliseconds_between_publishes"]):
+        msg = (
+            "num milliseconds since last publish (%.0f) exceeds threshold - publish traps"
+            % milliseconds_since_last_publish
+        )
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         post_dmaap()
     else:
-        msg = "neither milliseconds_since_last_publish (%.0f) or traps_since_last_publish (%d) exceed threshold - continue" % (
-            milliseconds_since_last_publish, tds.traps_since_last_publish)
-        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO,
-                     tds.CODE_GENERAL, msg)
+        msg = (
+            "neither milliseconds_since_last_publish (%.0f) or traps_since_last_publish (%d) exceed threshold - continue"
+            % (milliseconds_since_last_publish, tds.traps_since_last_publish)
+        )
+        ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
 
 # # # # # # # # # # # # #
@@ -751,12 +769,9 @@ def notif_receiver_cb(snmp_engine, stateReference, contextEngineId, contextName,
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Post SNMP traps '
-                                                 'to message bus')
-    parser.add_argument('-v', action="store_true", dest="verbose",
-                        help="verbose logging")
-    parser.add_argument('-?', action="store_true", dest="usage_requested",
-                        help="show command line use")
+    parser = argparse.ArgumentParser(description="Post SNMP traps " "to message bus")
+    parser.add_argument("-v", action="store_true", dest="verbose", help="verbose logging")
+    parser.add_argument("-?", action="store_true", dest="usage_requested", help="show command line use")
 
     # parse args
     args = parser.parse_args()
@@ -784,7 +799,10 @@ if __name__ == "__main__":
     # get config binding service (CBS) values (either broker, or json file override)
     load_all_configs(0, 0)
     msg = "%s : %s version %s starting" % (
-        prog_name, tds.c_config['snmptrapd']['title'], tds.c_config['snmptrapd']['version'])
+        prog_name,
+        tds.c_config["snmptrapd"]["title"],
+        tds.c_config["snmptrapd"]["version"],
+    )
     stdout_logger(msg)
 
     # open various ecomp logs
@@ -797,22 +815,33 @@ if __name__ == "__main__":
         stdout_logger(msg)
         # use specific flags or 'all' for full debugging
         # debug.setLogger(debug.Debug('dsp', 'msgproc'))
-        debug.setLogger(debug.Debug('all'))
+        debug.setLogger(debug.Debug("all"))
 
     # name and open arriving trap log
-    tds.arriving_traps_filename = tds.c_config['files']['runtime_base_dir'] + "/" + \
-        tds.c_config['files']['log_dir'] + "/" + \
-        (tds.c_config['files']['arriving_traps_log'])
+    tds.arriving_traps_filename = (
+        tds.c_config["files"]["runtime_base_dir"]
+        + "/"
+        + tds.c_config["files"]["log_dir"]
+        + "/"
+        + (tds.c_config["files"]["arriving_traps_log"])
+    )
     tds.arriving_traps_fd = open_file(tds.arriving_traps_filename)
-    msg = ("arriving traps logged to: %s" % tds.arriving_traps_filename)
+    msg = "arriving traps logged to: %s" % tds.arriving_traps_filename
     stdout_logger(msg)
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
     # name and open json trap log
-    tds.json_traps_filename = tds.c_config['files']['runtime_base_dir'] + "/" + tds.c_config['files']['log_dir'] + "/" + "DMAAP_" + (
-        tds.c_config['streams_publishes']['sec_fault_unsecure']['dmaap_info']['topic_url'].split('/')[-1]) + ".json"
+    tds.json_traps_filename = (
+        tds.c_config["files"]["runtime_base_dir"]
+        + "/"
+        + tds.c_config["files"]["log_dir"]
+        + "/"
+        + "DMAAP_"
+        + (tds.c_config["streams_publishes"]["sec_fault_unsecure"]["dmaap_info"]["topic_url"].split("/")[-1])
+        + ".json"
+    )
     tds.json_traps_fd = open_file(tds.json_traps_filename)
-    msg = ("published traps logged to: %s" % tds.json_traps_filename)
+    msg = "published traps logged to: %s" % tds.json_traps_filename
     stdout_logger(msg)
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
 
@@ -820,8 +849,9 @@ if __name__ == "__main__":
     signal.signal(signal.SIGUSR1, load_all_configs)
 
     # save current PID for future/external reference
-    tds.pid_file_name = tds.c_config['files']['runtime_base_dir'] + \
-        '/' + tds.c_config['files']['pid_dir'] + '/' + prog_name + ".pid"
+    tds.pid_file_name = (
+        tds.c_config["files"]["runtime_base_dir"] + "/" + tds.c_config["files"]["pid_dir"] + "/" + prog_name + ".pid"
+    )
     msg = "Runtime PID file: %s" % tds.pid_file_name
     ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
     rc = save_pid(tds.pid_file_name)
@@ -839,8 +869,8 @@ if __name__ == "__main__":
 
     # UDP over IPv4
     try:
-        ipv4_interface = tds.c_config['protocols']['ipv4_interface']
-        ipv4_port = int(tds.c_config['protocols']['ipv4_port'])
+        ipv4_interface = tds.c_config["protocols"]["ipv4_interface"]
+        ipv4_port = int(tds.c_config["protocols"]["ipv4_port"])
 
         try:
             # FIXME:  this doesn't appear to throw an exception even if
@@ -850,16 +880,11 @@ if __name__ == "__main__":
             #         means to confirm proper privileges (then
             #         close it and reopen w/ pysnmp api)
             config.addTransport(
-                snmp_engine,
-                udp.domainName + (1,),
-                udp.UdpTransport().openServerMode(
-                    (ipv4_interface, ipv4_port))
+                snmp_engine, udp.domainName + (1,), udp.UdpTransport().openServerMode((ipv4_interface, ipv4_port))
             )
         except Exception as e:
-            msg = "Unable to bind to %s:%d - %s" % (
-                ipv4_interface, ipv4_port, str(e))
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL,
-                         tds.CODE_GENERAL, msg)
+            msg = "Unable to bind to %s:%d - %s" % (ipv4_interface, ipv4_port, str(e))
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
             stdout_logger(msg)
             cleanup_and_exit(1, tds.pid_file_name)
 
@@ -870,22 +895,17 @@ if __name__ == "__main__":
 
     # UDP over IPv6
     try:
-        ipv6_interface = tds.c_config['protocols']['ipv6_interface']
-        ipv6_port = int(tds.c_config['protocols']['ipv6_port'])
+        ipv6_interface = tds.c_config["protocols"]["ipv6_interface"]
+        ipv6_port = int(tds.c_config["protocols"]["ipv6_port"])
 
         try:
             config.addTransport(
-                snmp_engine,
-                udp6.domainName,
-                udp6.Udp6Transport().openServerMode(
-                    (ipv6_interface, ipv6_port))
+                snmp_engine, udp6.domainName, udp6.Udp6Transport().openServerMode((ipv6_interface, ipv6_port))
             )
         except Exception as e:
-            msg = "Unable to bind to %s:%d - %s" % (
-                ipv6_interface, ipv6_port, str(e))
+            msg = "Unable to bind to %s:%d - %s" % (ipv6_interface, ipv6_port, str(e))
             stdout_logger(msg)
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL,
-                         tds.CODE_GENERAL, msg)
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
             cleanup_and_exit(1, tds.pid_file_name)
 
     except Exception as e:
@@ -900,25 +920,21 @@ if __name__ == "__main__":
     # SecurityName <-> CommunityName mapping
     #     to restrict trap reception to only those with specific community
     #     strings
-    config.addV1System(snmp_engine, 'my-area', 'public')
+    config.addV1System(snmp_engine, "my-area", "public")
 
     # register comm_string_rewrite_observer for message arrival
-    snmp_engine.observer.registerObserver(
-        comm_string_rewrite_observer,
-        'rfc2576.processIncomingMsg:writable'
-    )
+    snmp_engine.observer.registerObserver(comm_string_rewrite_observer, "rfc2576.processIncomingMsg:writable")
 
     # # # # # # # # # # # #
     # SNMPv3 setup
     # # # # # # # # # # # #
-    config, snmp_engine = load_snmpv3_credentials(
-        config, snmp_engine, tds.c_config)
+    config, snmp_engine = load_snmpv3_credentials(config, snmp_engine, tds.c_config)
 
     # register snmp_engine_observer_cb for message arrival
     snmp_engine.observer.registerObserver(
         snmp_engine_observer_cb,
-        'rfc3412.receiveMessage:request',
-        'rfc3412.returnResponsePdu',
+        "rfc3412.receiveMessage:request",
+        "rfc3412.returnResponsePdu",
     )
 
     # Register SNMP Application at the SNMP engine

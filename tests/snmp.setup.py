@@ -1,6 +1,5 @@
-# org.onap.dcae
-# ================================================================================
-# Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+# ============LICENSE_START=======================================================
+# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============LICENSE_END=========================================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
 
 import argparse
 import array
@@ -44,6 +41,7 @@ import uuid as uuid_mod
 from collections import Counter
 from onap_dcae_cbs_docker_client.client import get_config
 from pysnmp.carrier.asyncio.dgram import udp, udp6
+
 # from pysnmp.carrier.asyncore.dgram import udp
 from pysnmp.entity import engine, config
 from pysnmp.entity.rfc3413 import ntfrcv
@@ -60,14 +58,14 @@ install_reqs = parse_requirements("requirements.txt", session=PipSession())
 reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
-    name = "dcaegen2-collectors-snmptrap",
-    description = "snmp trap receiver for ONAP docker image",
-    version = "1.4.0",
+    name="dcaegen2-collectors-snmptrap",
+    description="snmp trap receiver for ONAP docker image",
+    version="1.4.0",
     packages=find_packages(),
-    author = "Dave L",
-    author_email = "dl3158@att.com",
-    license='Apache 2',
-    keywords = "",
-    url = "",
-    install_requires=reqs
+    author="Dave L",
+    author_email="dl3158@att.com",
+    license="Apache 2",
+    keywords="",
+    url="",
+    install_requires=reqs,
 )

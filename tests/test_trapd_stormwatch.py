@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ import unittest
 import trapd_exit
 import time
 
-import trapd_stormwatch as sw 
-import trapd_stormwatch_settings as sws 
+import trapd_stormwatch as sw
+import trapd_stormwatch_settings as sws
 import trapd_stats_settings as stats
+
 
 class test_cleanup_and_exit(unittest.TestCase):
     """
     Test for presense of required vars
     """
- 
 
     def test_increment_existing_counter(self):
         """
@@ -36,7 +36,7 @@ class test_cleanup_and_exit(unittest.TestCase):
         sw.sw_init()
         stats.init()
 
-        oid=".1.2.3.4.5.6"
+        oid = ".1.2.3.4.5.6"
         sws.sw_config_oid_dict[oid] = True
         sws.sw_config_low_water_in_interval_dict[oid] = 1
         sws.sw_config_high_water_in_interval_dict[oid] = 10
@@ -79,7 +79,7 @@ class test_cleanup_and_exit(unittest.TestCase):
         # now make sure we get an exception
         sws.sw_config_category = 3
         self.assertFalse(sw.sw_clear_dicts())
-        
+
         # clean up the attributes we added above
         delattr(sws, "sw_storm_counter_dict")
         delattr(stats, "agent_counter_dict")
@@ -95,12 +95,12 @@ class test_cleanup_and_exit(unittest.TestCase):
         stats.total_notifications = 3
         stats.total_notifications = 50
         sws.sw_interval_in_seconds = 30
-        stats.agent_counter_dict = { "a": 3, "b": 40 }
+        stats.agent_counter_dict = {"a": 3, "b": 40}
         stats.metric_log_notification_threshold_pct = 30
         sw.sw_log_metrics()
 
         # make sure we got this far
-        assert(True)
+        assert True
 
     def test_sw_storm_active(self):
         """
@@ -160,9 +160,10 @@ class test_cleanup_and_exit(unittest.TestCase):
             stats.oid_counter_dict = {}
         stats.oid_counter_dict["abc"] = 5
         self.assertTrue(sw.sw_storm_active(loc_agent, loc_oid))
-        self.assertTrue(not hasattr(sws,"oid_counter_dict"))
+        self.assertTrue(not hasattr(sws, "oid_counter_dict"))
         # .get("abc") != None)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # sws.init()
     unittest.main()

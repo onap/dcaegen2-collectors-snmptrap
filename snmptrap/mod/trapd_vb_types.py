@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ module for converting varbind types from Net-SNMP to PYSNMP
 
 """
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 import json
 import os
@@ -42,18 +42,18 @@ prog_name = os.path.basename(__file__)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 _pysnmp_to_netsnmp_vb_type = {
-    'Integer32': 'integer',
-    'Integer': 'integer',
-    'Gauge32': 'unsigned',
-    'Counter32': 'counter32',
-    'OctetString': 'octet',
-    'py_type_5': 'hex',
-    'py_type_6': 'decimal',
-    'Null': 'null',
-    'ObjectIdentifier': 'oid',
-    'TimeTicks': 'timeticks',
-    'IpAddress': 'ipaddress',
-    'Bits': 'bits'
+    "Integer32": "integer",
+    "Integer": "integer",
+    "Gauge32": "unsigned",
+    "Counter32": "counter32",
+    "OctetString": "octet",
+    "py_type_5": "hex",
+    "py_type_6": "decimal",
+    "Null": "null",
+    "ObjectIdentifier": "oid",
+    "TimeTicks": "timeticks",
+    "IpAddress": "ipaddress",
+    "Bits": "bits",
 }
 
 default_vb_type = "octet"
@@ -77,7 +77,6 @@ def pysnmp_to_netsnmp_varbind_convert(_pysnmp_vb_type):
         return _netsnmp_vb_type
     except Exception as e:
         # if not found, return original pysnmp type
-        msg = ("%s not configured as pysnmp varbind type - returning %s"
-               % (_pysnmp_vb_type,default_vb_type))
+        msg = "%s not configured as pysnmp varbind type - returning %s" % (_pysnmp_vb_type, default_vb_type)
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         return default_vb_type

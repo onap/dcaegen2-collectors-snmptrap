@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ import pytest
 import unittest
 import trapd_exit
 
-pid_file="/tmp/test_pid_file"
-pid_file_dne="/tmp/test_pid_file_NOT"
+pid_file = "/tmp/test_pid_file"
+pid_file_dne = "/tmp/test_pid_file_NOT"
 
-import trapd_stormwatch_settings as sws 
+import trapd_stormwatch_settings as sws
+
 
 class test_cleanup_and_exit(unittest.TestCase):
     """
     Test for presense of required vars
     """
- 
 
     def test_nonexistent_dict(self):
         """
@@ -41,7 +41,7 @@ class test_cleanup_and_exit(unittest.TestCase):
             result = False
 
         self.assertEqual(result, False)
- 
+
     def test_storm_counter_dict(self):
         """
         Test storm_counter_dict
@@ -54,7 +54,7 @@ class test_cleanup_and_exit(unittest.TestCase):
             result = False
 
         self.assertEqual(result, True)
- 
+
     def test_storm_active_dict(self):
         """
         Test storm_active_dict
@@ -153,6 +153,7 @@ class test_cleanup_and_exit(unittest.TestCase):
 
         self.assertEqual(result, True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # sws.init()
     unittest.main()

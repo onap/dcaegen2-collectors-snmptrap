@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ trapd_http_session establishes an http session for future use in publishing
 messages to the dmaap cluster.
 """
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 import os
 import requests
@@ -81,8 +81,7 @@ def close_session_obj(_loc_http_requ_session):
             return True
         except Exception as e:
             msg = "Unable to close current http session - FATAL ERROR, exiting"
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL,
-                         tds.CODE_GENERAL, msg)
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
             stdout_logger(msg)
             cleanup_and_exit(1, tds.pid_file_name)
 

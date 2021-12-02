@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 """
 """
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 # basics
 import datetime
@@ -54,8 +54,14 @@ def roll_all_logs():
     # NOTE:  this will go away when onap logging is standardized/available
     try:
         # open various ecomp logs - if any fails, exit
-        for fd in [tds.eelf_error_fd, tds.eelf_debug_fd, tds.eelf_audit_fd,
-                   tds.eelf_metrics_fd, tds.arriving_traps_fd, tds.json_traps_fd]:
+        for fd in [
+            tds.eelf_error_fd,
+            tds.eelf_debug_fd,
+            tds.eelf_audit_fd,
+            tds.eelf_metrics_fd,
+            tds.arriving_traps_fd,
+            tds.json_traps_fd,
+        ]:
             fd.close()
 
         roll_file(tds.eelf_error_file_name)
@@ -80,8 +86,7 @@ def roll_all_logs():
     try:
         tds.json_traps_fd = open_file(tds.json_traps_filename)
     except Exception as e:
-        msg = ("Error opening json_log %s : %s" %
-               (json_traps_filename, str(e)))
+        msg = "Error opening json_log %s : %s" % (json_traps_filename, str(e))
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
@@ -91,8 +96,7 @@ def roll_all_logs():
     try:
         tds.arriving_traps_fd = open_file(tds.arriving_traps_filename)
     except Exception as e:
-        msg = ("Error opening arriving traps %s : %s" %
-               (arriving_traps_filename, str(e)))
+        msg = "Error opening arriving traps %s : %s" % (arriving_traps_filename, str(e))
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
@@ -111,8 +115,7 @@ def open_eelf_logs():
     try:
         # open various ecomp logs - if any fails, exit
 
-        tds.eelf_error_file_name = (
-            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_error'])
+        tds.eelf_error_file_name = tds.c_config["files"]["eelf_base_dir"] + "/" + tds.c_config["files"]["eelf_error"]
         tds.eelf_error_fd = open_file(tds.eelf_error_file_name)
 
     except Exception as e:
@@ -121,8 +124,7 @@ def open_eelf_logs():
         cleanup_and_exit(1, tds.pid_file_name)
 
     try:
-        tds.eelf_debug_file_name = (
-            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_debug'])
+        tds.eelf_debug_file_name = tds.c_config["files"]["eelf_base_dir"] + "/" + tds.c_config["files"]["eelf_debug"]
         tds.eelf_debug_fd = open_file(tds.eelf_debug_file_name)
 
     except Exception as e:
@@ -131,8 +133,7 @@ def open_eelf_logs():
         cleanup_and_exit(1, tds.pid_file_name)
 
     try:
-        tds.eelf_audit_file_name = (
-            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_audit'])
+        tds.eelf_audit_file_name = tds.c_config["files"]["eelf_base_dir"] + "/" + tds.c_config["files"]["eelf_audit"]
         tds.eelf_audit_fd = open_file(tds.eelf_audit_file_name)
     except Exception as e:
         msg = "Error opening eelf audit log : " + str(e)
@@ -141,7 +142,8 @@ def open_eelf_logs():
 
     try:
         tds.eelf_metrics_file_name = (
-            tds.c_config['files']['eelf_base_dir'] + "/" + tds.c_config['files']['eelf_metrics'])
+            tds.c_config["files"]["eelf_base_dir"] + "/" + tds.c_config["files"]["eelf_metrics"]
+        )
         tds.eelf_metrics_fd = open_file(tds.eelf_metrics_file_name)
     except Exception as e:
         msg = "Error opening eelf metric log : " + str(e)
@@ -149,6 +151,7 @@ def open_eelf_logs():
         cleanup_and_exit(1, tds.pid_file_name)
 
     return True
+
 
 # # # # # # # # # # # # # # # # # # #
 # fx: roll_log_file -> move provided filename to timestamped version
@@ -160,11 +163,11 @@ def roll_file(_loc_file_name):
     move active file to timestamped archive
     """
 
-    _file_name_suffix = "%s" % (datetime.datetime.fromtimestamp(time.time()).
-                                fromtimestamp(time.time()).
-                                strftime('%Y-%m-%dT%H:%M:%S'))
+    _file_name_suffix = "%s" % (
+        datetime.datetime.fromtimestamp(time.time()).fromtimestamp(time.time()).strftime("%Y-%m-%dT%H:%M:%S")
+    )
 
-    _loc_file_name_bak = _loc_file_name + '.' + _file_name_suffix
+    _loc_file_name_bak = _loc_file_name + "." + _file_name_suffix
 
     # roll existing file if present
     if os.path.isfile(_loc_file_name):
@@ -172,14 +175,12 @@ def roll_file(_loc_file_name):
             os.rename(_loc_file_name, _loc_file_name_bak)
             return True
         except Exception as e:
-            _msg = ("ERROR: Unable to rename %s to %s"
-                    % (_loc_file_name,
-                       _loc_file_name_bak))
-            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_ERROR,
-                         tds.CODE_GENERAL, _msg)
+            _msg = "ERROR: Unable to rename %s to %s" % (_loc_file_name, _loc_file_name_bak)
+            ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_ERROR, tds.CODE_GENERAL, _msg)
             return False
 
     return False
+
 
 # # # # # # # # # # # # #
 # fx: open_log_file
@@ -194,17 +195,16 @@ def open_file(_loc_file_name):
     try:
         # open append mode just in case so nothing is lost, but should be
         # non-existent file
-        _loc_fd = open(_loc_file_name, 'a', 1)
+        _loc_fd = open(_loc_file_name, "a", 1)
         return _loc_fd
     except Exception as e:
         msg = "Error opening " + _loc_file_name + " append mode - " + str(e)
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
-
-# # # # # # # # # # # # #
-# fx: close_file
-# # # # # # # # # # # # #
+    # # # # # # # # # # # # #
+    # fx: close_file
+    # # # # # # # # # # # # #
     """
     close _loc_file_name, return True with success, False otherwise
     """
@@ -216,10 +216,10 @@ def close_file(_loc_fd, _loc_filename):
         _loc_fd.close()
         return True
     except Exception as e:
-        msg = "Error closing %s : %s - results indeterminate" % (
-            _loc_filename, str(e))
+        msg = "Error closing %s : %s - results indeterminate" % (_loc_filename, str(e))
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_FATAL, tds.CODE_GENERAL, msg)
         return False
+
 
 # # # # # # # # # # # # # # # # # # #
 # fx: ecomp_logger -> log in eelf format until standard
@@ -317,13 +317,22 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
 
     # catch invalid log type
     if _log_type < 1 or _log_type > 5:
-        msg = ("INVALID log type: %s " % _log_type)
-        _out_rec = ("%s|%s|%s|%s|%s|%s|%s|%s|%s"
-                    % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, (msg + _msg)))
+        msg = "INVALID log type: %s " % _log_type
+        _out_rec = "%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
+            calling_fx,
+            "snmptrapd",
+            unused,
+            unused,
+            unused,
+            tds.SEV_TYPES[_sev],
+            _error_code,
+            unused,
+            (msg + _msg),
+        )
         try:
-            tds.eelf_error_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+            tds.eelf_error_fd.write("%s|%s\n" % (t_out, str(_out_rec)))
             if log_to_stdout:
-                print('%s|%s' % (t_out, str(_out_rec)))
+                print("%s|%s" % (t_out, str(_out_rec)))
         except Exception as e:
             stdout_logger(str(_out_rec))
 
@@ -335,34 +344,79 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
             # _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
             # _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
             #            % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
-            _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s'
-                        % (unused, unused, calling_fx, unused, "snmptrapd", unused, unused, unused, unused, unused, unused, unused, tds.SEV_TYPES[_sev], unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, unused, _msg))
+            _out_rec = "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
+                unused,
+                unused,
+                calling_fx,
+                unused,
+                "snmptrapd",
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                tds.SEV_TYPES[_sev],
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                unused,
+                _msg,
+            )
             try:
-                tds.eelf_error_fd.write('%s|%s|%s\n' % (t_out, t_out, str(_out_rec)))
+                tds.eelf_error_fd.write("%s|%s|%s\n" % (t_out, t_out, str(_out_rec)))
                 if log_to_stdout:
-                    print('%s|%s|%s' % (t_out, t_out, str(_out_rec)))
+                    print("%s|%s|%s" % (t_out, t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
         elif _log_type == tds.LOG_TYPE_AUDIT:
             # log message in AUDIT format
             # _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
             #             % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
-            _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
-                        % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
+            _out_rec = "%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
+                calling_fx,
+                "snmptrapd",
+                unused,
+                unused,
+                unused,
+                tds.SEV_TYPES[_sev],
+                _error_code,
+                unused,
+                _msg,
+            )
             try:
-                tds.eelf_audit_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+                tds.eelf_audit_fd.write("%s|%s\n" % (t_out, str(_out_rec)))
                 if log_to_stdout:
-                    print('%s|%s' % (t_out, str(_out_rec)))
+                    print("%s|%s" % (t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
         elif _log_type == tds.LOG_TYPE_METRICS:
             # log message in METRICS format
-            _out_rec = ('%s|%s|%s|%s|%s|%s|%s|%s|%s'
-                        % (calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
+            _out_rec = "%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
+                calling_fx,
+                "snmptrapd",
+                unused,
+                unused,
+                unused,
+                tds.SEV_TYPES[_sev],
+                _error_code,
+                unused,
+                _msg,
+            )
             try:
-                tds.eelf_metrics_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+                tds.eelf_metrics_fd.write("%s|%s\n" % (t_out, str(_out_rec)))
                 if log_to_stdout:
-                    print('%s|%s' % (t_out, str(_out_rec)))
+                    print("%s|%s" % (t_out, str(_out_rec)))
             except Exception as e:
                 stdout_logger(str(_out_rec))
 
@@ -370,16 +424,27 @@ def ecomp_logger(_log_type, _sev, _error_code, _msg):
         # DLFM: too much I/O !!!
         # always write to debug; we need ONE logfile that has time-sequence full view !!!
         # log message in DEBUG format
-        _out_rec = ("%s|%s|%s|%s|%s|%s|%s|%s|%s|%s"
-                    % (unused, calling_fx, "snmptrapd", unused, unused, unused, tds.SEV_TYPES[_sev], _error_code, unused, _msg))
+        _out_rec = "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
+            unused,
+            calling_fx,
+            "snmptrapd",
+            unused,
+            unused,
+            unused,
+            tds.SEV_TYPES[_sev],
+            _error_code,
+            unused,
+            _msg,
+        )
         try:
-            tds.eelf_debug_fd.write('%s|%s\n' % (t_out, str(_out_rec)))
+            tds.eelf_debug_fd.write("%s|%s\n" % (t_out, str(_out_rec)))
             if log_to_stdout:
-                print('%s|%s' % (t_out, str(_out_rec)))
+                print("%s|%s" % (t_out, str(_out_rec)))
         except Exception as e:
             stdout_logger(str(_out_rec))
 
     return True
+
 
 # # # # # # # # # # # # #
 # fx: stdout_logger
@@ -403,4 +468,4 @@ def stdout_logger(_msg):
 
     t_out = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S,%f")[:-3]
 
-    print('%s %s' % (t_out, _msg))
+    print("%s %s" % (t_out, _msg))

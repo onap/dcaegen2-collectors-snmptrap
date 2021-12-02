@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ env variable that specifies JSON equiv of CBS config (typically used for
 testing purposes)
 """
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 import json
 import os
@@ -76,17 +76,14 @@ def get_cbs_config():
             stdout_logger(msg)
             cleanup_and_exit(1, None)
         else:
-            msg = ("ONAP controller override specified via CBS_SIM_JSON: %s" %
-                   _cbs_sim_json_file)
+            msg = "ONAP controller override specified via CBS_SIM_JSON: %s" % _cbs_sim_json_file
             stdout_logger(msg)
             try:
                 tds.c_config = json.load(open(_cbs_sim_json_file))
-                msg = ("%s loaded and parsed successfully" %
-                       _cbs_sim_json_file)
+                msg = "%s loaded and parsed successfully" % _cbs_sim_json_file
                 stdout_logger(msg)
             except Exception as e:
-                msg = "Unable to load CBS_SIM_JSON " + _cbs_sim_json_file + \
-                    " (invalid json?) - FATAL ERROR, exiting"
+                msg = "Unable to load CBS_SIM_JSON " + _cbs_sim_json_file + " (invalid json?) - FATAL ERROR, exiting"
                 stdout_logger(msg)
                 cleanup_and_exit(1, None)
 
@@ -96,24 +93,24 @@ def get_cbs_config():
 
     # recalc timeout, set default if not present
     try:
-        tds.timeout_seconds = float(tds.c_config['publisher']['http_milliseconds_timeout'] / 1000.0)
+        tds.timeout_seconds = float(tds.c_config["publisher"]["http_milliseconds_timeout"] / 1000.0)
     except Exception as e:
         tds.timeout_seconds = float(1.5)
 
     # recalc seconds_between_retries, set default if not present
     try:
-        tds.seconds_between_retries = float(tds.c_config['publisher']['http_milliseconds_between_retries'] / 1000.0)
+        tds.seconds_between_retries = float(tds.c_config["publisher"]["http_milliseconds_between_retries"] / 1000.0)
     except Exception as e:
-        tds.seconds_between_retries = float(.750)
+        tds.seconds_between_retries = float(0.750)
 
     # recalc min_severity_to_log, set default if not present
     try:
-        tds.minimum_severity_to_log = int(tds.c_config['files']['minimum_severity_to_log'])
+        tds.minimum_severity_to_log = int(tds.c_config["files"]["minimum_severity_to_log"])
     except Exception as e:
         tds.minimum_severity_to_log = int(3)
 
     try:
-        tds.publisher_retries = int(tds.c_config['publisher']['http_retries'])
+        tds.publisher_retries = int(tds.c_config["publisher"]["http_retries"])
     except Exception as e:
         tds.publisher_retries = int(2)
 

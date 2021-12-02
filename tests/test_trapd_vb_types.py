@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2019-2021 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,13 +26,22 @@ import trapd_settings as tds
 import trapd_vb_types
 
 from pysnmp.entity import engine, config
- 
+
+
 class test_trapd_vb_types(unittest.TestCase):
     """
     Test snmpv3 module
     """
 
-    good_varbind_types = ["Integer", "Unsigned32", "Counter32", "OctetString", "ObjectIdentifier", "TimeTicks", "IpAddress"]
+    good_varbind_types = [
+        "Integer",
+        "Unsigned32",
+        "Counter32",
+        "OctetString",
+        "ObjectIdentifier",
+        "TimeTicks",
+        "IpAddress",
+    ]
 
     def trapd_vb_type_conversion_integer(self):
         """
@@ -139,6 +148,6 @@ class test_trapd_vb_types(unittest.TestCase):
         # should return default of octet if not defined
         self.assertEqual(result, "octet")
 
- 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
