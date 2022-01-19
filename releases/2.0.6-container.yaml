@@ -1,0 +1,9 @@
+distribution_type: 'container'
+version: '2.0.6'
+project: 'dcaegen2-collectors-snmptrap'
+log_dir: 'dcaegen2-collectors-snmptrap-master-release-version-java-daily/1454/'
+containers:
+  - name: 'org.onap.dcaegen2.collectors.snmptrap'
+    version: '2.0.6-SNAPSHOT-20220116T033419Z'
+container_release_tag: '2.0.6'
+ref: 'cf7f98a554e4b594fd531729908694bb4b211442'
