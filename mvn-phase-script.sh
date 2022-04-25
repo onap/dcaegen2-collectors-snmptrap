@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ================================================================================
-# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ PROJECT_ROOT=$(dirname $0)
 
 
 echo "MVN_RELEASE_TAG is set to [$MVN_RELEASE_TAG]"
-RELEASE_TAG=${MVN_RELEASE_TAG:-R10}
+RELEASE_TAG=${MVN_RELEASE_TAG:-R11}
 if [ "$RELEASE_TAG" != "R1" ]; then
   RELEASE_TAGGED_DIR="${RELEASE_TAG}/"
 else
