@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ================================================================================
-# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,25 +27,7 @@ MVN_PROJECT_MODULEID="$1"
 MVN_PHASE="$2"
 PROJECT_ROOT=$(dirname $0)
 
-
-echo "MVN_RELEASE_TAG is set to [$MVN_RELEASE_TAG]"
-RELEASE_TAG=${MVN_RELEASE_TAG:-R10}
-if [ "$RELEASE_TAG" != "R1" ]; then
-  RELEASE_TAGGED_DIR="${RELEASE_TAG}/"
-else
-  RELEASE_TAGGED_DIR=""
-fi
-
-#source "${PROJECT_ROOT}"/mvn-phase-lib.sh
-if ! wget -O ${PROJECT_ROOT}/mvn-phase-lib.sh \
-  "$MVN_RAWREPO_BASEURL_DOWNLOAD"/org.onap.dcaegen2.utils/${RELEASE_TAGGED_DIR}scripts/mvn-phase-lib.sh; then
-  echo "Fail to download mvn-phase-lib.sh"
-  exit 1
-fi
-
-
-source ./mvn-phase-lib.sh
-
+source "${PROJECT_ROOT}"/mvn-phase-lib.sh
 
 # Customize the section below for each project
 case $MVN_PHASE in
