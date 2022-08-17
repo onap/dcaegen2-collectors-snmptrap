@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,28 +64,23 @@ def get_cbs_config():
         msg = "ONAP controller not present, trying json config override via CBS_SIM_JSON env variable"
         stdout_logger(msg)
 
-        try:
-            _cbs_sim_json_file = os.getenv("CBS_SIM_JSON", "None")
-        except Exception as e:
+        _cbs_sim_json_file = os.getenv("CBS_SIM_JSON")
+
+        if _cbs_sim_json_file is None:
             msg = "CBS_SIM_JSON not defined - FATAL ERROR, exiting"
             stdout_logger(msg)
             cleanup_and_exit(1, None)
 
-        if _cbs_sim_json_file == "None":
-            msg = "CBS_SIM_JSON not defined - FATAL ERROR, exiting"
+        msg = "ONAP controller override specified via CBS_SIM_JSON: %s" % _cbs_sim_json_file
+        stdout_logger(msg)
+        try:
+            tds.c_config = json.load(open(_cbs_sim_json_file))
+            msg = "%s loaded and parsed successfully" % _cbs_sim_json_file
+            stdout_logger(msg)
+        except Exception as e:
+            msg = "Unable to load CBS_SIM_JSON " + _cbs_sim_json_file + " (invalid json?) - FATAL ERROR, exiting"
             stdout_logger(msg)
             cleanup_and_exit(1, None)
-        else:
-            msg = "ONAP controller override specified via CBS_SIM_JSON: %s" % _cbs_sim_json_file
-            stdout_logger(msg)
-            try:
-                tds.c_config = json.load(open(_cbs_sim_json_file))
-                msg = "%s loaded and parsed successfully" % _cbs_sim_json_file
-                stdout_logger(msg)
-            except Exception as e:
-                msg = "Unable to load CBS_SIM_JSON " + _cbs_sim_json_file + " (invalid json?) - FATAL ERROR, exiting"
-                stdout_logger(msg)
-                cleanup_and_exit(1, None)
 
     # display consul config returned, regardless of source
     msg = "cbs config: %s" % json.dumps(tds.c_config)

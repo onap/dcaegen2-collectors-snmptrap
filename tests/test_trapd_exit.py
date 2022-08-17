@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 # limitations under the License.
 # ============LICENSE_END=========================================================
 
-import pytest
 import unittest
 import trapd_exit
 
@@ -29,27 +28,26 @@ class test_cleanup_and_exit(unittest.TestCase):
 
     def test_normal_exit(self):
         """
-        Test normal exit works as expected
+        Test normal exit works as expected, and exits with the 1st arg
         """
-        open(pid_file, "w")
+        # create an empty pid file
+        with open(pid_file, "w"):
+            pass
 
-        with pytest.raises(SystemExit) as pytest_wrapped_sys_exit:
+        with self.assertRaises(SystemExit) as exc:
             result = trapd_exit.cleanup_and_exit(0, pid_file)
-            assert pytest_wrapped_sys_exit.type == SystemExit
-            assert pytest_wrapped_sys_exit.value.code == 0
+        self.assertEqual(str(exc.exception), "0")
 
-        # compare = str(result).startswith("SystemExit: 0")
-        # self.assertEqual(compare, True)
 
     def test_abnormal_exit(self):
         """
-        Test exit with missing PID file exits non-zero
+        Test exit with missing PID file. Still exits with the 1st arg.
         """
-        with pytest.raises(SystemExit) as pytest_wrapped_sys_exit:
+
+        with self.assertRaises(SystemExit) as exc:
             result = trapd_exit.cleanup_and_exit(0, pid_file_dne)
-            assert pytest_wrapped_sys_exit.type == SystemExit
-            assert pytest_wrapped_sys_exit.value.code == 1
+        self.assertEqual(str(exc.exception), "0")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     unittest.main()
