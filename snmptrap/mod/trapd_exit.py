@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,12 +46,7 @@ def cleanup_and_exit(_loc_exit_code, _pid_file_name):
       none
     :Keywords:
       runtime PID exit
-    :Variables:
-      _num_params
-        number of parameters passed to module
     """
-
-    # _num_params = len(locals())
 
     if _pid_file_name is not None:
         rc = rm_pid(_pid_file_name)
