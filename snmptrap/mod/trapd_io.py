@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,15 +54,19 @@ def roll_all_logs():
     # NOTE:  this will go away when onap logging is standardized/available
     try:
         # open various ecomp logs - if any fails, exit
-        for fd in [
-            tds.eelf_error_fd,
-            tds.eelf_debug_fd,
-            tds.eelf_audit_fd,
-            tds.eelf_metrics_fd,
-            tds.arriving_traps_fd,
-            tds.json_traps_fd,
+        for fd, nm in [
+            (tds.eelf_error_fd, "error"),
+            (tds.eelf_debug_fd, "debug"),
+            (tds.eelf_audit_fd, "eelf"),
+            (tds.eelf_metrics_fd, "metrics"),
+            (tds.arriving_traps_fd, "arriving_traps"),
+            (tds.json_traps_fd, "json_traps"),
         ]:
-            fd.close()
+            if fd is None:
+                msg = "Error closing log file for " + nm
+                stdout_logger(msg)
+            else:
+                fd.close()
 
         roll_file(tds.eelf_error_file_name)
         roll_file(tds.eelf_debug_file_name)
@@ -86,7 +90,7 @@ def roll_all_logs():
     try:
         tds.json_traps_fd = open_file(tds.json_traps_filename)
     except Exception as e:
-        msg = "Error opening json_log %s : %s" % (json_traps_filename, str(e))
+        msg = "Error opening json_log %s : %s" % (tds.json_traps_filename, str(e))
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
@@ -96,7 +100,7 @@ def roll_all_logs():
     try:
         tds.arriving_traps_fd = open_file(tds.arriving_traps_filename)
     except Exception as e:
-        msg = "Error opening arriving traps %s : %s" % (arriving_traps_filename, str(e))
+        msg = "Error opening arriving traps %s : %s" % (tds.arriving_traps_filename, str(e))
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
 
@@ -119,6 +123,7 @@ def open_eelf_logs():
         tds.eelf_error_fd = open_file(tds.eelf_error_file_name)
 
     except Exception as e:
+        # here if we cannot create the filename
         msg = "Error opening eelf error log : " + str(e)
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
@@ -128,6 +133,7 @@ def open_eelf_logs():
         tds.eelf_debug_fd = open_file(tds.eelf_debug_file_name)
 
     except Exception as e:
+        # here if we cannot create the filename
         msg = "Error opening eelf debug log : " + str(e)
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
@@ -136,6 +142,7 @@ def open_eelf_logs():
         tds.eelf_audit_file_name = tds.c_config["files"]["eelf_base_dir"] + "/" + tds.c_config["files"]["eelf_audit"]
         tds.eelf_audit_fd = open_file(tds.eelf_audit_file_name)
     except Exception as e:
+        # here if we cannot create the filename
         msg = "Error opening eelf audit log : " + str(e)
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
@@ -146,6 +153,7 @@ def open_eelf_logs():
         )
         tds.eelf_metrics_fd = open_file(tds.eelf_metrics_file_name)
     except Exception as e:
+        # here if we cannot create the filename
         msg = "Error opening eelf metric log : " + str(e)
         stdout_logger(msg)
         cleanup_and_exit(1, tds.pid_file_name)
@@ -205,9 +213,9 @@ def open_file(_loc_file_name):
     # # # # # # # # # # # # #
     # fx: close_file
     # # # # # # # # # # # # #
-    """
-    close _loc_file_name, return True with success, False otherwise
-    """
+
+    #  close _loc_file_name, return True with success, False otherwise
+    # FIXME: is ther code missing here?
 
 
 def close_file(_loc_fd, _loc_filename):

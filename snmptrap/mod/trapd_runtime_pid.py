@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,11 +53,7 @@ def save_pid(_pid_file_name):
     except IOError:
         print("IOError saving PID file %s :" % _pid_file_name)
         return False
-    # except:
-    #     print("Error saving PID file %s :" % _pid_file_name)
-    #     return False
     else:
-        # print("Runtime PID file:    %s" % _pid_file_name)
         return True
 
 
@@ -76,7 +72,6 @@ def rm_pid(_pid_file_name):
     :Keywords:
       pid /var/run
     """
-
     try:
         if os.path.isfile(_pid_file_name):
             os.remove(_pid_file_name)
@@ -84,6 +79,6 @@ def rm_pid(_pid_file_name):
         else:
             return False
 
-    except IOError:
+    except:
         print("Error removing Runtime PID file:    %s" % _pid_file_name)
         return False

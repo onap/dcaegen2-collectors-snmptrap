@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.7] - 2022/08/17
+- [DCAEGEN2-3158] CodeCoverage improvement for dcaegen2-collectors-snmptrap (60% to 90%)
+
 ## [2.0.6] - 2021/10/26
 ### Changed
 * [DCAEGEN2-2957] SNMP Trap collector - STDOUT complaince

@@ -1,0 +1,2 @@
+runtests:
+	cd .. && $(MAKE) runtests
