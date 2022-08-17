@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ __docformat__ = "restructuredtext"
 import os
 import requests
 import traceback
+from trapd_io import ecomp_logger, stdout_logger
+import trapd_settings as tds
+from trapd_exit import cleanup_and_exit
 
 prog_name = os.path.basename(__file__)
 

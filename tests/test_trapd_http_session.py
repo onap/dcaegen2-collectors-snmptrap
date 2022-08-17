@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2019-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2019-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
 # limitations under the License.
 # ============LICENSE_END=========================================================
 
-import pytest
 import unittest
 import trapd_http_session
+import requests
+from unittest.mock import Mock, patch
+import trapd_settings as tds
 
 
 class test_init_session_obj(unittest.TestCase):
@@ -24,39 +26,62 @@ class test_init_session_obj(unittest.TestCase):
     Test the init_session_obj mod
     """
 
-    def close_nonexisting_session(self):
-        """
-        test close of existing http session
-        """
-        sess = "no session"
-        result = trapd_http_session.close_session_obj(sess)
-        self.assertEqual(result, True)
+    @classmethod
+    def setUpClass(cls):
+        tds.init()
 
-    def init_session(self):
+    def test_init_session_obj(self):
         """
         test creation of http session
         """
-        result = trapd_http_session.init_session_obj()
-        compare = str(result).startswith("<requests.sessions.Session object at")
-        self.assertEqual(compare, True)
+        self.assertIsInstance(trapd_http_session.init_session_obj(), requests.sessions.Session)
+
+
+    def test_init_session_obj_raises(self):
+        """
+        test close when the requests.Session() method throws an exception
+        """
+        with patch('requests.Session') as magic_requests:
+            magic_requests.side_effect = RuntimeError("Session() throws via mock")
+            with self.assertRaises(SystemExit) as exc:
+                trapd_http_session.init_session_obj()
+            self.assertEqual(str(exc.exception), "1")
+
+
+    def test_close_nonexisting_session(self):
+        """
+        test close of non-existing http session
+        """
+        self.assertIsNone(trapd_http_session.close_session_obj(None))
+
+
+    def test_close_nonexisting_close_raises(self):
+        """
+        test close when the session.close() method throws
+        """
+        class CloseThrows():
+            def close(self):
+                raise RuntimeError("close() throws")
+
+        with self.assertRaises(SystemExit):
+            trapd_http_session.close_session_obj(CloseThrows())
+
 
     def test_reset(self):
         """
         test reset of existing http session
         """
         sess = trapd_http_session.init_session_obj()
-        result = trapd_http_session.reset_session_obj(sess)
-        compare = str(result).startswith("<requests.sessions.Session object at")
-        self.assertEqual(compare, True)
+        self.assertIsInstance(trapd_http_session.reset_session_obj(sess), requests.sessions.Session)
 
-    def close_existing_session(self):
+
+    def test_close_existing_session(self):
         """
         test close of existing http session
         """
         sess = trapd_http_session.init_session_obj()
-        result = trapd_http_session.close_session_obj(sess)
-        self.assertEqual(result, True)
+        self.assertTrue(trapd_http_session.close_session_obj(sess))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     unittest.main()

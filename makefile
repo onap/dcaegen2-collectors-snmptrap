@@ -1,3 +1,4 @@
 runtests:
-	. ~/bin/set_proxies; tox tests | cat
-	coverage html
+	-[ -d /tmp/opt ] && find /tmp/opt -type d -exec chmod 755 {} +
+	rm -rf /tmp/opt
+	tox tests | cat
