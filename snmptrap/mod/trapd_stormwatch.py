@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2020-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,8 +65,8 @@ def sw_init():
 
 
 # # # # # # # # # # # # #
-# fx: sw_storm_active
-#      - check if storm is active for agent/oid
+# fx: sw_clear_dicts
+#      - clear out all dictionaries in stats
 #      - returns True if yes, False if no
 # # # # # # # # # # # # #
 def sw_clear_dicts():
@@ -97,7 +97,9 @@ def sw_clear_dicts():
         if hasattr(sws, "sw_config_category"):
             sws.sw_config_category.clear()
         return True
+
     except Exception as e:
+        print(f">>>> got exception {e}")
         msg = "unable to reset stormwatch dictionaries - results will be indeterminate: %s" % (e)
         ecomp_logger(tds.LOG_TYPE_ERROR, tds.SEV_WARN, tds.CODE_GENERAL, msg)
         return False
@@ -123,7 +125,8 @@ def sw_load_trap_config(_config):
         ret = sw_clear_dicts()
         msg = "reset existing sws dictionaries to empty"
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
-    except NameError:
+
+    except (NameError, AttributeError):
         msg = "sws dictionaries not present - initializing"
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
         ret = sw_init()
@@ -138,6 +141,7 @@ def sw_load_trap_config(_config):
         )
         msg = "metric_log_notification_threshold_pct value: %d" % stats.metric_log_notification_threshold_pct
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+
     except Exception as e:
         msg = "metric_log_notification_threshold_pct not present in config - default to 25"
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_WARN, tds.CODE_GENERAL, msg)
@@ -148,6 +152,7 @@ def sw_load_trap_config(_config):
         sws.sw_interval_in_seconds = int(_config["trap_config"]["sw_interval_in_seconds"])
         msg = "sw_interval_in_seconds value: %d" % sws.sw_interval_in_seconds
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_INFO, tds.CODE_GENERAL, msg)
+
     except Exception as e:
         msg = "sw_interval_in_seconds not present in config - default to 60 seconds"
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_WARN, tds.CODE_GENERAL, msg)
@@ -156,16 +161,18 @@ def sw_load_trap_config(_config):
     # add trap configs from CBS json structure to running config
     try:
         notify_oids = _config["trap_config"]["notify_oids"]
+
     except Exception as e:
         msg = "no trap_config or notify_oids defined"
         ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_WARN, tds.CODE_GENERAL, msg)
-        return False
+        return 0
 
     trap_block_counter = 0
     for trap_block in notify_oids:
         # oid
         try:
             _oid = trap_block["oid"]
+
         except Exception as e:
             msg = "missing oid value in notify_oids - oid section of CBS config - using empty value, disregard entry"
             ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_WARN, tds.CODE_GENERAL, msg)
@@ -174,6 +181,7 @@ def sw_load_trap_config(_config):
         # sw_high_water_in_interval
         try:
             _sw_high_water_in_interval = int(trap_block["sw_high_water_in_interval"])
+
         except Exception as e:
             msg = (
                 "missing sw_high_water_in_interval value in notify_oids - oid section of CBS config - using empty value"
@@ -184,6 +192,7 @@ def sw_load_trap_config(_config):
         # sw_low_water_in_interval
         try:
             _sw_low_water_in_interval = int(trap_block["sw_low_water_in_interval"])
+
         except Exception as e:
             msg = (
                 "missing sw_low_water_in_interval value in notify_oids - oid section of CBS config - using empty value"
@@ -194,6 +203,7 @@ def sw_load_trap_config(_config):
         # category
         try:
             _category = trap_block["category"]
+
         except Exception as e:
             msg = "missing category value in notify_oids - oid section of CBS config - using empty value"
             ecomp_logger(tds.LOG_TYPE_DEBUG, tds.SEV_WARN, tds.CODE_GENERAL, msg)

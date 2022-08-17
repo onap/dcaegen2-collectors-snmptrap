@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2020-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2020-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 # limitations under the License.
 # ============LICENSE_END=========================================================
 
-import pytest
 import unittest
 import trapd_exit
 
@@ -34,26 +33,16 @@ class test_cleanup_and_exit(unittest.TestCase):
         Test nosuch var
         """
         sws.init()
-        try:
-            sws.no_such_var
-            result = True
-        except:
-            result = False
+        self.assertFalse(hasattr(sws, 'no_such_var'))
 
-        self.assertEqual(result, False)
 
     def test_storm_counter_dict(self):
         """
         Test storm_counter_dict
         """
         sws.init()
-        try:
-            sws.sw_storm_counter_dict
-            result = True
-        except:
-            result = False
+        self.assertTrue(hasattr(sws, 'sw_storm_counter_dict'))
 
-        self.assertEqual(result, True)
 
     def test_storm_active_dict(self):
         """
@@ -61,13 +50,8 @@ class test_cleanup_and_exit(unittest.TestCase):
         """
 
         sws.init()
-        try:
-            sws.sw_storm_active_dict
-            result = True
-        except:
-            result = False
+        self.assertTrue(hasattr(sws, 'sw_storm_active_dict'))
 
-        self.assertEqual(result, True)
 
     def test_sw_config_oid_dict(self):
         """
@@ -75,13 +59,8 @@ class test_cleanup_and_exit(unittest.TestCase):
         """
 
         sws.init()
-        try:
-            sws.sw_config_oid_dict
-            result = True
-        except:
-            result = False
+        self.assertTrue(hasattr(sws, 'sw_config_oid_dict'))
 
-        self.assertEqual(result, True)
 
     def test_sw_config_low_water_in_interval_dict(self):
         """
@@ -89,13 +68,8 @@ class test_cleanup_and_exit(unittest.TestCase):
         """
 
         sws.init()
-        try:
-            sws.sw_config_low_water_in_interval_dict
-            result = True
-        except:
-            result = False
+        self.assertTrue(hasattr(sws, 'sw_config_low_water_in_interval_dict'))
 
-        self.assertEqual(result, True)
 
     def test_sw_config_high_water_in_interval_dict(self):
         """
@@ -103,13 +77,8 @@ class test_cleanup_and_exit(unittest.TestCase):
         """
 
         sws.init()
-        try:
-            sws.sw_config_high_water_in_interval_dict
-            result = True
-        except:
-            result = False
+        self.assertTrue(hasattr(sws, 'sw_config_high_water_in_interval_dict'))
 
-        self.assertEqual(result, True)
 
     def test_sw_config_category(self):
         """
@@ -117,43 +86,26 @@ class test_cleanup_and_exit(unittest.TestCase):
         """
 
         sws.init()
-        try:
-            sws.sw_config_category
-            result = True
-        except:
-            result = False
+        self.assertTrue(hasattr(sws, 'sw_config_category'))
 
-        self.assertEqual(result, True)
 
     def test_sw_interval_in_seconds(self):
         """
         Test sw_interval
         """
-
         sws.init()
-        try:
-            str(sws.sw_interval_in_seconds).isnumeric()
-            result = True
-        except:
-            result = False
+        self.assertTrue(hasattr(sws, 'sw_interval_in_seconds'))
+        self.assertTrue(str(sws.sw_interval_in_seconds).isnumeric())
 
-        self.assertEqual(result, True)
 
     def test_sw_last_stormwatch_dict_analysis(self):
         """
         Test last_stormwatch_dict_analysis
         """
-
         sws.init()
-        try:
-            str(sws.sw_last_stormwatch_dict_analysis).isnumeric()
-            result = True
-        except:
-            result = False
-
-        self.assertEqual(result, True)
+        self.assertTrue(hasattr(sws, 'sw_last_stormwatch_dict_analysis'))
+        self.assertTrue(str(sws.sw_last_stormwatch_dict_analysis).isnumeric())
 
 
-if __name__ == "__main__":
-    # sws.init()
-    unittest.main()
+if __name__ == "__main__": # pragma: no cover
+    unittest.main(verbosity=2)

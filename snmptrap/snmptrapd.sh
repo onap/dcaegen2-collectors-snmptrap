@@ -2,7 +2,7 @@
 # -*- indent-tabs-mode: nil -*- # vi: set expandtab:
 #
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ fi
 export PYTHONPATH=${bin_base_dir}/mod:$PYTHONPATH
 
 # PYTHONUNBUFFERED:
-#    set PYTHONUNBUFFERED to a non-empty string to avoid output buffering; 
+#    set PYTHONUNBUFFERED to a non-empty string to avoid output buffering;
 #    comment out for runtime environments/better performance!
 # export PYTHONUNBUFFERED="True"
 
@@ -77,14 +77,14 @@ export CBS_SIM_JSON=${base_dir}/etc/snmptrapd.json
 # misc
 exit_after=1
 
-# # # # # # # # # # 
+# # # # # # # # # #
 # log_msg - log messages to stdout in standard manner
-# # # # # # # # # # 
+# # # # # # # # # #
 log_msg()
 {
    msg=$*
 
-   echo "`date +%Y-%m-%dT%H:%M:%S,%N | cut -c1-23` ${msg}" 
+   echo "`date +%Y-%m-%dT%H:%M:%S,%N | cut -c1-23` ${msg}"
 }
 
 #
@@ -96,7 +96,7 @@ process_name=$1
 pid_file=$2
 exec_cmd=$3
 
-   # check if exec_cmd has a pid_file 
+   # check if exec_cmd has a pid_file
    if [ ! -r ${pid_file} ]
    then
       log_msg "Starting ${process_name}"
@@ -123,13 +123,13 @@ exec_cmd=$3
    fi
 }
 
-# # # # # # # # # # 
+# # # # # # # # # #
 # Start the service
-# # # # # # # # # # 
+# # # # # # # # # #
 start_service()
 {
    # Hints for startup modifications:
-   # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+   # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
    # handy for debug (e.g. docker logs output)
    # log_msg "Runtime env present for ${current_module} placed in ${base_dir}/logs/${current_module}.out"
@@ -165,9 +165,9 @@ start_service()
    fi
 }
 
-# # # # # # # # # # 
+# # # # # # # # # #
 # Stop the service
-# # # # # # # # # # 
+# # # # # # # # # #
 stop_process()
 {
 process_name=$1
@@ -337,7 +337,7 @@ case "$1" in
           status_service
           wait
           ;;
-   "stop") 
+   "stop")
           version
           stop_service
           ;;
@@ -348,7 +348,7 @@ case "$1" in
           start_service
           status_service
           ;;
-   "status") 
+   "status")
           version
           status_service
           ;;

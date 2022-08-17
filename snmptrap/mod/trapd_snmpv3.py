@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -82,8 +82,6 @@ def load_snmpv3_credentials(_py_config, _snmp_engine, _cbs_config):
         #     find options at -> site-packages/pysnmp/entity/config.py
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        # print("Checking auth for %s" % (userName))
-
         # usmHMACMD5AuthProtocol
         try:
             authKey = v3_user["usmHMACMD5AuthProtocol"]
@@ -122,8 +120,6 @@ def load_snmpv3_credentials(_py_config, _snmp_engine, _cbs_config):
         # privacy
         #     find options at -> site-packages/pysnmp/entity/config.py
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-        # print("Checking priv for %s" % (userName))
 
         # usm3DESEDEPriv
         try:
