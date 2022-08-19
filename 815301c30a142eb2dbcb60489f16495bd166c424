@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2d7b570c_a9be4769",
+        "filename": "snmptrap/mod/trapd_io.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2022-08-19T15:05:04Z",
+      "side": 1,
+      "message": "This whole block starting at \"fx: close_file\" doesn\u0027t make much sense to me. If the function should open a file, why should it then close it? Is the comment about \"return True...\" correct?  (Doesn\u0027t make sense to me that it would be correct.)",
+      "parentUuid": "7fc39ab2_d2839ac9",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 218,
+        "endChar": 39
+      },
+      "revId": "815301c30a142eb2dbcb60489f16495bd166c424",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "094f78ff_6a391b69",
         "filename": "tests/test_trapd_stormwatch.py",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ab78de9f_e71b61a8",
+        "filename": "tests/test_trapd_stormwatch.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2022-08-19T15:05:04Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "094f78ff_6a391b69",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 24
+      },
+      "revId": "815301c30a142eb2dbcb60489f16495bd166c424",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9a2ccfe6_b38b5a04",
         "filename": "tests/test_trapd_stormwatch_settings.py",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2022-08-17T22:19:04Z",
       "side": 1,
       "message": "can be removed",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 24
+      },
+      "revId": "815301c30a142eb2dbcb60489f16495bd166c424",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ec399d9_471f2b05",
+        "filename": "tests/test_trapd_stormwatch_settings.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 105
+      },
+      "writtenOn": "2022-08-19T15:05:04Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "9a2ccfe6_b38b5a04",
       "range": {
         "startLine": 26,
         "startChar": 0,
