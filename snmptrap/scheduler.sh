@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============LICENSE_START=======================================================
-# Copyright (c) 2017-2020 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2017-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,10 +56,10 @@ _verbosity=$2
 _log_message=$3
 
    echo "`date` `date +%s` ${_fx} ${_error_code} ${_log_message}" >> ${log_fd}
-   
+
    # log_lines=`wc -l ${log_fd} | awk {'print $1'} | bc`
    # log_lines=$((${log_lines}+1))
-   
+
    # if [ ${log_lines} -ge ${max_log_lines} ]
    # then
    #    if [ -f ${log_fd} ]
@@ -178,9 +178,9 @@ do
                run_daily_jobs
                # reset last_day
                last_day=${current_day}
-            fi      
-         fi      
-      fi      
+            fi
+         fi
+      fi
    fi
    sleep ${sleep_time}
 done

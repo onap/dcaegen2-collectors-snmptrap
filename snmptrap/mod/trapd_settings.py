@@ -1,5 +1,5 @@
 # ============LICENSE_START=======================================================
-# Copyright (c) 2018-2021 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2018-2022 AT&T Intellectual Property. All rights reserved.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ def init():
     global json_traps_filename
     json_traps_filename = ""
     global json_traps_fd
-    json_fd = None
+    json_traps_fd = None
     # </json log of traps published>
 
     # <log of arriving traps >
