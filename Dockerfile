@@ -1,5 +1,6 @@
+# Copyright (c) 2023 J. F. Lucas.  All rights reserved.
 # Use an official pypy runtime as a base image
-FROM pypy:3
+FROM pypy:3.8
 
 ENV INSROOT /opt/app
 ENV APPUSER snmptrap

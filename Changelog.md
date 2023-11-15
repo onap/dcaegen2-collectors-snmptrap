@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.8] - 2023/11/15
+- [DCAEGEN2-3409] Correctly use version 2.2.1 of onap_dcae_cbs_docker_client by specifying it in requirements.txt
+- [DCAEGEN2-3409] Explicitly set version for pyasn1 to 0.4.8 to avoid using later versions that are incompatible with pysnmp.
+- [DCAEGEN2-3409] Set base image to pypy:3.8 to avoid pulling a later version of python with incompatibilities.
+
 ## [2.0.7] - 2022/08/17
 - [DCAEGEN2-3158] CodeCoverage improvement for dcaegen2-collectors-snmptrap (60% to 90%)
 
