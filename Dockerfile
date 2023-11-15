@@ -1,5 +1,7 @@
+# Copyright (c) 2023 J. F. Lucas.  All rights reserved.
+# (Previous versions by other authors did not have copyright notice.)
 # Use an official pypy runtime as a base image
-FROM pypy:3
+FROM pypy:3.8
 
 ENV INSROOT /opt/app
 ENV APPUSER snmptrap
@@ -14,7 +16,7 @@ RUN useradd -d ${APPDIR} ${APPUSER}
 
 WORKDIR ${APPDIR}
 
-EXPOSE 162:6162/udp
+EXPOSE 6162/udp
 
 # Copy the current directory contents into the container at ${APPDIR}
 COPY ./snmptrap/ ./bin/
